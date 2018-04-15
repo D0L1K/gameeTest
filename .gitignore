@@ -4,6 +4,9 @@
 # Apache
 /Apache24/logs/
 
+# Redis
+/Redis/server_log.txt
+
 # Composer
 /PhpApps/vendor/
 /PhpApps/composer.lock
