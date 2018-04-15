@@ -4,7 +4,7 @@ namespace Api;
 
 class Score
 {
-    public function insert(\stdClass $params = null)
+    public function insert(int $gameId, int $playerId, int $score)
     {
         $test = '';
     }

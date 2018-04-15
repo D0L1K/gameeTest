@@ -1,11 +1,14 @@
 <?php
 namespace Logic;
 
+use Logic\Exceptions\InvalidParamsException;
 use Logic\Exceptions\InvalidRequestException;
 use Logic\Exceptions\ParseErrorException;
 use Nette\DI\Container;
 use Nette\Application\BadRequestException;
 use Nette\Http\Request;
+use ReflectionMethod;
+use ReflectionParameter;
 
 class ApiHandler
 {
@@ -39,10 +42,12 @@ class ApiHandler
                 throw new InvalidRequestException('Must be POST call');
             }
             $rpcRequest = $this->parseJsonRpcRequest($httpRequest);
-            $classObj = $this->container->createInstance($this->getEndpointClass($request));
+            $className = $this->getEndpointClass($request);
+            $classObj = $this->container->createInstance($className);
             $method = $rpcRequest->getMethod();
             $params = $rpcRequest->getParams();
-            $result = $classObj->$method($params);
+            $orderedParams = $this->getMethodParams($className, $method, $params);
+            $result = \call_user_func_array([$classObj, $method], $orderedParams);
 
         } catch (\Exception $e) {
             $this->handleException($e);
@@ -105,5 +110,37 @@ class ApiHandler
         }
 
         return new JsonRpcRequest($jsonRpcParam, $methodParam, $idParam, $paramsParam);
+    }
+
+    /**
+     * @param string $className
+     * @param string $method
+     * @param \stdClass|null $params
+     * @return array
+     * @throws \ReflectionException
+     * @throws InvalidParamsException
+     */
+    private function getMethodParams(string $className, string $method, \stdClass $params = null): array
+    {
+        $r = new ReflectionMethod($className, $method);
+        /** @var ReflectionParameter[] $methodParams */
+        $methodParams = $r->getParameters();
+        if ($params === null && \count($methodParams) > 0) {
+            throw new InvalidParamsException('No params provided, however method needs params');
+        }
+        $orderedParams = [];
+        foreach ($methodParams as $methodParam) {
+            $name = $methodParam->getName();
+            if (!isset($params->$name) && !$methodParam->isOptional()) {
+                throw new InvalidParamsException("Missing required parameter '$name'");
+            }
+            if (!isset($params->$name) && $methodParam->isOptional()) {
+                $orderedParams[] = null;
+            } elseif (isset($params->$name)) {
+                $orderedParams[] = $params->$name;
+            }
+        }
+
+        return $orderedParams;
     }
 }
