@@ -5,4 +5,5 @@ application:
 
 services:
 	router: Logic\Factories\RouterFactory::createRouter
-	apiRouter: Logic\Factories\ApiRouterFactory::createRouter
+	- Logic\ApiRouter
+	- Logic\ApiHandler

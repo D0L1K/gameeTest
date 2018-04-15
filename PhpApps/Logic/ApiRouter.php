@@ -6,9 +6,9 @@ use Api\Score;
 class ApiRouter
 {
     /** @var array */
-    private $routes;
+    private $routes = [];
     /** @var bool */
-    private $inited;
+    private $inited = false;
 
     /**
      * ApiRouter constructor.
@@ -32,5 +32,14 @@ class ApiRouter
         ];
 
         $this->inited = true;
+    }
+
+    /**
+     * @param string $endpoint
+     * @return null|string
+     */
+    public function getEndpointClass(string $endpoint): ?string
+    {
+        return isset($this->routes[strtolower($endpoint)]) ? strtolower($endpoint) : null;
     }
 }
