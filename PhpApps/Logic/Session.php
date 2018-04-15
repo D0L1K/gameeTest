@@ -22,6 +22,14 @@ class Session
     }
 
     /**
+     * @return RedisClient
+     */
+    public function getClient(): RedisClient
+    {
+        return $this->dbClient;
+    }
+
+    /**
      * @return Session
      * @throws \Exception
      */

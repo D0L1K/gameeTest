@@ -1,5 +1,6 @@
 <?php
 namespace Model;
+use Logic\Session;
 
 /**
  * Class AbstractModel
@@ -11,6 +12,7 @@ class Model
 {
     protected const TYPE_INT = 0;
     protected const TYPE_STRING = 1;
+    protected const TYPE_DATE = 2;
 
     /** @var array  */
     protected $vars = [];
@@ -115,6 +117,24 @@ class Model
 
     public function load()
     {
-        $dbId = $this->getTableKey() . $this->getId();
+        $session = Session::getCurrent();
+        $dbClient = $session->getClient();
+
+    }
+
+    /**
+     * @return string
+     */
+    protected function getHashKey(): string
+    {
+        return $this->getTableKey();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getFieldKey(): string
+    {
+        return $this->getId();
     }
 }
