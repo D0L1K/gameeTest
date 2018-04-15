@@ -6,3 +6,4 @@
 
 # Composer
 /PhpApps/vendor/
+/PhpApps/composer.lock
