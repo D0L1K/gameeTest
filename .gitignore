@@ -7,3 +7,7 @@
 # Composer
 /PhpApps/vendor/
 /PhpApps/composer.lock
+
+# Common
+/PhpApps/Temp/
+/PhpApps/Logs/
