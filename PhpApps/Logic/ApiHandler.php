@@ -1,9 +1,11 @@
 <?php
 namespace Logic;
 
+use Logic\Exceptions\InvalidRequestException;
+use Logic\Exceptions\ParseErrorException;
 use Nette\DI\Container;
 use Nette\Application\BadRequestException;
-use Nette\Application\Request;
+use Nette\Http\Request;
 
 class ApiHandler
 {
@@ -25,51 +27,36 @@ class ApiHandler
     }
 
     /**
-     * @param Request $request
+     * @param Request $httpRequest
+     * @param \Nette\Application\Request $request
      * @return mixed
-     * @throws \Nette\InvalidArgumentException
      * @throws BadRequestException
      */
-    public function handle(Request $request)
+    public function handle(Request $httpRequest, \Nette\Application\Request $request)
     {
-        $this->checkJsonRpc($request);
-        $classObj = $this->container->createInstance($this->getEndpointClass($request));
-        $method = $this->getMethod($request);
-        $params = $this->parseParams($request);
+        try {
+            if ($httpRequest->getMethod() !== Request::POST) {
+                throw new InvalidRequestException('Must be POST call');
+            }
+            $rpcRequest = $this->parseJsonRpcRequest($httpRequest);
+            $classObj = $this->container->createInstance($this->getEndpointClass($request));
+            $method = $rpcRequest->getMethod();
+            $params = $rpcRequest->getParams();
+            $result = $classObj->$method($params);
 
-        return $classObj->$method($params);
-    }
-
-    /**
-     * @param Request $request
-     * @throws BadRequestException
-     */
-    private function checkJsonRpc(Request $request): void
-    {
-        $jsonRpcParam = $request->getParameter('jsonrpc');
-        if ($jsonRpcParam === null) {
-            $this->raiseJsonRpcExcpetion('Missing \'jsonrpc\' param');
+        } catch (\Exception $e) {
+            $this->handleException($e);
         }
-        if ($jsonRpcParam !== '2.0') {
-            $this->raiseJsonRpcExcpetion('Param\'jsonrpc\' has wrong value. Expected: 2.0, got: '. $jsonRpcParam);
-        }
+
+        return $result;
     }
 
     /**
-     * @param string $error
-     * @throws BadRequestException
-     */
-    private function raiseJsonRpcExcpetion(string $error): void
-    {
-        throw new BadRequestException('Request is not valid JSON RPC call - ' . $error);
-    }
-
-    /**
-     * @param Request $request
+     * @param \Nette\Application\Request $request
      * @return string
      * @throws BadRequestException
      */
-    private function getEndpointClass(Request $request): string
+    private function getEndpointClass(\Nette\Application\Request $request): string
     {
         $endpoint = $request->getParameter('endpoint');
         if (!\is_string($endpoint) || $endpoint === '') {
@@ -85,28 +72,38 @@ class ApiHandler
     }
 
     /**
-     * @param Request $request
-     * @return string
-     * @throws BadRequestException
+     * @param Request $httpRequest
+     * @return JsonRpcRequest
+     * @throws InvalidRequestException
+     * @throws ParseErrorException
      */
-    private function getMethod(Request $request): string
+    private function parseJsonRpcRequest(Request $httpRequest): JsonRpcRequest
     {
-        $method = $request->getParameter('method');
-        if (!\is_string($method) || $method === '') {
-            $this->raiseJsonRpcExcpetion('Missing \'method\' param');
+        $body = $httpRequest->getRawBody();
+        $parsedBody = json_decode($body);
+        if ($parsedBody === null) {
+            throw new ParseErrorException();
+        }
+        $jsonRpcParam = $parsedBody->jsonrpc ?? null;
+        if ($jsonRpcParam === null) {
+            throw new InvalidRequestException('Missing \'jsonrpc\' param');
+        }
+        if ($jsonRpcParam !== '2.0') {
+            throw new InvalidRequestException('Param\'jsonrpc\' has wrong value. Expected: 2.0, got: '. $jsonRpcParam);
+        }
+        $methodParam = $parsedBody->method ?? null;
+        if (!\is_string($methodParam) || $methodParam === '') {
+            throw new InvalidRequestException('Missing or empty \'method\' param');
+        }
+        $paramsParam = $parsedBody->method ?? null;
+        if ($paramsParam === null) {
+            throw new InvalidRequestException('Missing \'params\' param');
+        }
+        $idParam = $parsedBody->id ?? null;
+        if ($idParam === null) {
+            throw new InvalidRequestException('Missing \'id\' param');
         }
 
-        return $method;
-    }
-
-    /**
-     * @param Request $request
-     * @return array|null
-     */
-    private function parseParams(Request $request): ?array
-    {
-        $jsonParams = $request->getParameter('params');
-
-        return json_decode($jsonParams, true);
+        return new JsonRpcRequest($jsonRpcParam, $methodParam, $paramsParam, $idParam);
     }
 }

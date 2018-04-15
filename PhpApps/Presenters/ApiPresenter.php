@@ -27,19 +27,6 @@ class ApiPresenter extends Nette\Application\UI\Presenter
      */
     public function renderDefault(): void
     {
-        $request = $this->getRequest();
-        try {
-            if ($request === null) {
-                throw new \RuntimeException('Request missing');
-            }
-            $this->apiHandler->handle($request);
-        } catch (\Exception $e) {
-            $this->handleException($e);
-        }
-    }
-
-    private function handleException(\Exception $e)
-    {
-
+        $result = $this->apiHandler->handle($this->getHttpRequest(), $this->getRequest());
     }
 }

@@ -15,7 +15,7 @@ class RouterFactory
     public static function createRouter(): \Nette\Application\IRouter
     {
         $router = new RouteList;
-        $router[] = new Route('/api[/<endpoint>]', 'Api:default');
+        $router[] = new Route('/api[/<endpoint>][/<params>]', 'Api:default');
         $router[] = new Route('/', 'Default:default');
 
         return $router;
