@@ -3,3 +3,6 @@
 
 # Apache
 /Apache24/logs/
+
+# Composer
+/PhpApps/vendor/
