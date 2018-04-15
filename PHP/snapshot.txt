@@ -1,9 +1,9 @@
 This snapshot was automatically generated on
-Tue, 27 Mar 2018 23:21:10 +0000
+Wed, 28 Mar 2018 22:08:31 +0000
 
-Version: 7.0.29
+Version: 7.1.16
 Branch: HEAD
-Build: C:\php-sdk\php70dev\vc14\x64\obj\Release_TS
+Build: C:\php-snap-build\php71\vc14\x64\obj\Release_TS
 
 Built-in Extensions
 ===========================
@@ -19,6 +19,7 @@ json
 mcrypt
 SPL
 pcre
+readline
 Reflection
 session
 standard

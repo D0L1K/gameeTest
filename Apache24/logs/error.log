@@ -68,3 +68,15 @@ sl:warn] [pid 14092:tid 676] AH01873: Init: Session Cache is not configured [hin
 [Sun Apr 15 11:11:37.595960 2018] [mpm_winnt:notice] [pid 14092:tid 676] AH00418: Parent: Created child process 8216
 [Sun Apr 15 11:11:37.840960 2018] [ssl:warn] [pid 8216:tid 492] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]
 [Sun Apr 15 11:11:37.851460 2018] [mpm_winnt:notice] [pid 8216:tid 492] AH00354: Child: Starting 64 worker threads.
+[Sun Apr 15 11:25:06.764377 2018] [mpm_winnt:notice] [pid 14092:tid 676] AH00422: Parent: Received shutdown signal -- Shutting down the server.
+[Sun Apr 15 11:25:08.765575 2018] [mpm_winnt:notice] [pid 8216:tid 492] AH00364: Child: All worker threads have exited.
+[Sun Apr 15 11:25:08.782392 2018] [mpm_winnt:notice] [pid 14092:tid 676] AH00430: Parent: Child process 8216 exited successfully.
+Starting the 'Apache2.4' service
+The 'Apache2.4' service is running.
+sl:warn] [pid 10048:tid 668] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]
+[Sun Apr 15 11:25:26.265111 2018] [mpm_winnt:notice] [pid 10048:tid 668] AH00455: Apache/2.4.33 (Win64) OpenSSL/1.1.0h PHP/7.1.16 configured -- resuming normal operations
+[Sun Apr 15 11:25:26.265111 2018] [mpm_winnt:notice] [pid 10048:tid 668] AH00456: Server built: Mar 17 2018 21:05:15
+[Sun Apr 15 11:25:26.265111 2018] [core:notice] [pid 10048:tid 668] AH00094: Command line: 'C:\\Project\\gameeTest\\Apache24\\bin\\httpd.exe -d C:/Project/gameeTest/Apache24'
+[Sun Apr 15 11:25:26.267110 2018] [mpm_winnt:notice] [pid 10048:tid 668] AH00418: Parent: Created child process 13828
+[Sun Apr 15 11:25:26.513109 2018] [ssl:warn] [pid 13828:tid 512] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]
+[Sun Apr 15 11:25:26.523611 2018] [mpm_winnt:notice] [pid 13828:tid 512] AH00354: Child: Starting 64 worker threads.
