@@ -1,0 +1,7 @@
+application:
+	errorPresenter: Error
+	mapping:
+		*: \Presenters\*Presenter
+
+services:
+	router: Logic\RouterFactory::createRouter
