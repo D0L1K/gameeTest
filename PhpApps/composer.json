@@ -1,6 +1,7 @@
 {
   "require": {
     "php": ">=7.1",
-    "nette/nette": "~2.4.0"
+    "nette/nette": "~2.4.0",
+    "predis/predis": "1.1.1"
   }
 }
