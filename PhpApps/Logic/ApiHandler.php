@@ -81,7 +81,7 @@ class ApiHandler
             throw new BadRequestException("Handler class for endpoint \{$endpoint\} not found");
         }
 
-        return $endpoint;
+        return $endpointClass;
     }
 
     /**

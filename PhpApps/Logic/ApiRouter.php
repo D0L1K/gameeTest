@@ -40,6 +40,6 @@ class ApiRouter
      */
     public function getEndpointClass(string $endpoint): ?string
     {
-        return isset($this->routes[strtolower($endpoint)]) ? strtolower($endpoint) : null;
+        return $this->routes[strtolower($endpoint)] ?? null;
     }
 }
