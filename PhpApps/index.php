@@ -1,2 +1,3 @@
 <?php
-phpinfo();
+require_once 'loader.php';
+
