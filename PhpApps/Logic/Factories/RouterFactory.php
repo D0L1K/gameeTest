@@ -1,5 +1,5 @@
 <?php
-namespace Logic;
+namespace Logic\Factories;
 
 use Nette;
 use Nette\Application\Routers\Route;
@@ -8,6 +8,7 @@ use Nette\Application\Routers\RouteList;
 class RouterFactory
 {
     use Nette\StaticClass;
+
     /**
      * @return Nette\Application\IRouter
      */

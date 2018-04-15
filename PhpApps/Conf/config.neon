@@ -4,4 +4,5 @@ application:
 		*: \Presenters\*Presenter
 
 services:
-	router: Logic\RouterFactory::createRouter
+	router: Logic\Factories\RouterFactory::createRouter
+	apiRouter: Logic\Factories\ApiRouterFactory::createRouter
