@@ -4,12 +4,12 @@ namespace Api;
 
 class Score
 {
-    public function insert(array $params)
+    public function insert(\stdClass $params = null)
     {
         $test = '';
     }
 
-    public function getTop(array $params)
+    public function getTop(\stdClass $params = null)
     {
         $test = '';
     }

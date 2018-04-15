@@ -95,7 +95,7 @@ class ApiHandler
         if (!\is_string($methodParam) || $methodParam === '') {
             throw new InvalidRequestException('Missing or empty \'method\' param');
         }
-        $paramsParam = $parsedBody->method ?? null;
+        $paramsParam = $parsedBody->params ?? null;
         if ($paramsParam === null) {
             throw new InvalidRequestException('Missing \'params\' param');
         }
@@ -104,6 +104,6 @@ class ApiHandler
             throw new InvalidRequestException('Missing \'id\' param');
         }
 
-        return new JsonRpcRequest($jsonRpcParam, $methodParam, $paramsParam, $idParam);
+        return new JsonRpcRequest($jsonRpcParam, $methodParam, $idParam, $paramsParam);
     }
 }

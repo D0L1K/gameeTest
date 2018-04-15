@@ -7,7 +7,7 @@ class JsonRpcRequest
     protected $jsonrpc;
     /** @var string */
     protected $method;
-    /** @var array */
+    /** @var \stdClass|null */
     protected $params;
     /** @var int */
     protected $id;
@@ -16,10 +16,10 @@ class JsonRpcRequest
      * JsonRpcRequest constructor.
      * @param string $jsonrpc
      * @param string $method
-     * @param array $params
      * @param int $id
+     * @param \stdClass|null $params
      */
-    public function __construct(string $jsonrpc, string $method, array $params, int $id)
+    public function __construct(string $jsonrpc, string $method, int $id, \stdClass $params = null)
     {
         $this->jsonrpc = $jsonrpc;
         $this->method = $method;
@@ -44,9 +44,9 @@ class JsonRpcRequest
     }
 
     /**
-     * @return array
+     * @return \stdClass|null
      */
-    public function getParams(): array
+    public function getParams(): ?\stdClass
     {
         return $this->params;
     }
