@@ -1,6 +1,8 @@
 <?php
 namespace Logic\Exceptions;
 
+use Nette\Http\IResponse;
+
 class InvalidRequestException extends JsonRpcException
 {
     /**
@@ -9,6 +11,6 @@ class InvalidRequestException extends JsonRpcException
      */
     public function __construct(string $data = null)
     {
-        parent::__construct(-32600, 'Invalid Request', $data);
+        parent::__construct(Iresponse::S400_BAD_REQUEST, 'Invalid Request', -32600, $data);
     }
 }

@@ -3,9 +3,12 @@ namespace Logic;
 
 use Logic\Exceptions\InvalidParamsException;
 use Logic\Exceptions\InvalidRequestException;
+use Logic\Exceptions\JsonRpcException;
 use Logic\Exceptions\ParseErrorException;
 use Nette\DI\Container;
 use Nette\Application\BadRequestException;
+use Nette\Http\IRequest;
+use Nette\Http\IResponse;
 use Nette\Http\Request;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -16,7 +19,6 @@ class ApiHandler
     private $container;
     /** @var ApiRouter */
     private $apiRouter;
-
 
     /**
      * ApiHandler constructor.
@@ -30,30 +32,34 @@ class ApiHandler
     }
 
     /**
-     * @param Request $httpRequest
+     * @param IRequest $httpRequest
      * @param \Nette\Application\Request $request
-     * @return mixed
-     * @throws BadRequestException
+     * @return JsonRpcResponse
      */
-    public function handle(Request $httpRequest, \Nette\Application\Request $request)
+    public function handle(IRequest $httpRequest, \Nette\Application\Request $request): JsonRpcResponse
     {
+        $response = new JsonRpcResponse();
         try {
             if ($httpRequest->getMethod() !== Request::POST) {
                 throw new InvalidRequestException('Must be POST call');
             }
             $rpcRequest = $this->parseJsonRpcRequest($httpRequest);
+            $response->setId($rpcRequest->getId());
             $className = $this->getEndpointClass($request);
             $classObj = $this->container->createInstance($className);
             $method = $rpcRequest->getMethod();
             $params = $rpcRequest->getParams();
             $orderedParams = $this->getMethodParams($className, $method, $params);
-            $result = \call_user_func_array([$classObj, $method], $orderedParams);
-
+            $methodResult = \call_user_func_array([$classObj, $method], $orderedParams);
+            $response->setResult($methodResult);
         } catch (\Exception $e) {
-            $this->handleException($e);
+            if (!$e instanceof JsonRpcException) {
+                $e = new JsonRpcException(IResponse::S500_INTERNAL_SERVER_ERROR, $e->getMessage());
+            }
+            $response->setError($e);
         }
 
-        return $result;
+        return $response;
     }
 
     /**
@@ -70,19 +76,19 @@ class ApiHandler
 
         $endpointClass = $this->apiRouter->getEndpointClass($endpoint);
         if ($endpointClass === null) {
-            throw new BadRequestException("Handler class for endpoint \{$endpoint\} not found");
+            throw new BadRequestException("Handler class for endpoint '$endpoint' not found");
         }
 
         return $endpointClass;
     }
 
     /**
-     * @param Request $httpRequest
+     * @param IRequest $httpRequest
      * @return JsonRpcRequest
      * @throws InvalidRequestException
      * @throws ParseErrorException
      */
-    private function parseJsonRpcRequest(Request $httpRequest): JsonRpcRequest
+    private function parseJsonRpcRequest(IRequest $httpRequest): JsonRpcRequest
     {
         $body = $httpRequest->getRawBody();
         $parsedBody = json_decode($body);

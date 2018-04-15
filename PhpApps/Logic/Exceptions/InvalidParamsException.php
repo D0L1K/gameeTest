@@ -1,6 +1,8 @@
 <?php
 namespace Logic\Exceptions;
 
+use Nette\Http\IResponse;
+
 class InvalidParamsException extends JsonRpcException
 {
     /**
@@ -9,6 +11,6 @@ class InvalidParamsException extends JsonRpcException
      */
     public function __construct(string $data = null)
     {
-        parent::__construct(-32602, 'Invalid Params', $data);
+        parent::__construct(Iresponse::S400_BAD_REQUEST, 'Invalid Params', -32602, $data);
     }
 }

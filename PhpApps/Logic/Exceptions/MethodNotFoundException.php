@@ -1,6 +1,8 @@
 <?php
 namespace Logic\Exceptions;
 
+use Nette\Http\IResponse;
+
 class MethodNotFoundException extends JsonRpcException
 {
     /**
@@ -9,6 +11,6 @@ class MethodNotFoundException extends JsonRpcException
      */
     public function __construct(string $data = null)
     {
-        parent::__construct(-32601, 'Method not found', $data);
+        parent::__construct(Iresponse::S404_NOT_FOUND, 'Method not found', -32601, $data);
     }
 }

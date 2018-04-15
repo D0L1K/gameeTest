@@ -23,10 +23,13 @@ class ApiPresenter extends Nette\Application\UI\Presenter
     }
 
     /**
-     *
+     * @throws Nette\Application\AbortException
      */
     public function renderDefault(): void
     {
-        $result = $this->apiHandler->handle($this->getHttpRequest(), $this->getRequest());
+        $response = $this->apiHandler->handle($this->getHttpRequest(), $this->getRequest());
+
+        $this->getHttpResponse()->setCode($response->getCode());
+        $this->sendResponse($response->getHttpResponse());
     }
 }
