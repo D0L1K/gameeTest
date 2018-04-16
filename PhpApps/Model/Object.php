@@ -256,7 +256,7 @@ class Object
 
     /**
      * @param int|null $id
-     * @return self|null
+     * @return static|null
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      * @throws ObjectNotFoundException
@@ -331,7 +331,7 @@ class Object
      * @return \Kdyby\Redis\RedisClient
      * @throws \RuntimeException
      */
-    private function getDbClient(): \Kdyby\Redis\RedisClient
+    protected function getDbClient(): \Kdyby\Redis\RedisClient
     {
         $session = Session::getCurrent();
 

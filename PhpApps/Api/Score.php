@@ -4,6 +4,9 @@ namespace Api;
 
 use Nette\Application\BadRequestException;
 use Logic\Exceptions\ObjectNotFoundException;
+use Model\Game as GameModel;
+use Model\Player as PlayerModel;
+use Model\PlayerGame as PlayerGameModel;
 use Model\Score as ScoreModel;
 
 class Score
@@ -22,9 +25,26 @@ class Score
         return [1];
     }
 
-    public function insert(int $gameId, int $playerId, int $score)
+    /**
+     * @param int $gameId
+     * @param int $playerId
+     * @param int $score
+     * @return int
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
+     */
+    public function insert(int $gameId, int $playerId, int $score): int
     {
-        return ['test' => 1, 'test2' => 2];
+        $player = PlayerModel::getById($playerId);
+        $game = GameModel::getById($gameId);
+        $playerGame = PlayerGameModel::getByPlayerAndGame($player, $game);
+        if ($playerGame === null) {
+            $playerGame = PlayerGameModel::create($player, $game);
+        }
+        ScoreModel::create($playerGame, $score);
+
+        return 1;
     }
 
     public function getTop(int $first = null)
