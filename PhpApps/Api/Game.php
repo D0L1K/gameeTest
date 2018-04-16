@@ -3,22 +3,20 @@
 namespace Api;
 
 use Logic\Exceptions\ObjectNotFoundException;
-use Model\Player;
+use Model\Game as GameModel;
 
-class Players
+class Game
 {
     /**
-     * @param int $playerId
+     * @param int $gameId
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws ObjectNotFoundException
      */
-    public function get(int $playerId): array
+    public function get(int $gameId): array
     {
-        $player = Player::getById($playerId);
-
-        $player2 = Player::getById($playerId);
+        $game = GameModel::getById($gameId);
 
         return [1];
     }

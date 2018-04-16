@@ -18,7 +18,12 @@ class ObjectNotFoundException extends \Exception
      * @param int $code
      * @param Throwable|null $previous
      */
-    public function __construct(int $id, string $model, string $message = "", int $code = 0, Throwable $previous = null)
+    public function __construct(
+        int $id,
+        string $model,
+        string $message = 'Object not foung',
+        int $code = 404,
+        Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->id = $id;

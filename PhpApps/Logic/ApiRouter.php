@@ -1,8 +1,10 @@
 <?php
 namespace Logic;
 
-use Api\Players;
+use Api\Game;
+use Api\Player;
 use Api\Score;
+use Api\PlayerGame;
 
 class ApiRouter
 {
@@ -30,7 +32,9 @@ class ApiRouter
 
         $this->routes = [
             'score' => Score::class,
-            'players' => Players::class
+            'players' => Player::class,
+            'game' => Game::class,
+            'playergame' => PlayerGame::class
         ];
 
         $this->inited = true;
