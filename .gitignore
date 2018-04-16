@@ -6,6 +6,7 @@
 
 # Redis
 /Redis/server_log.txt
+/Redis/dump.rdb
 
 # Composer
 /PhpApps/vendor/
