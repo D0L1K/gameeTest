@@ -22,8 +22,6 @@ class Object
     protected $vars = [];
     /** @var array */
     protected $varsToType = [];
-    /** @var bool */
-    protected $save = false;
     /** @var string|null */
     protected $tableKey;
     /** @var string|null */
@@ -32,6 +30,8 @@ class Object
     private $fieldColumn;
     /** @var string|null */
     private $valueColumn;
+    /** @var bool */
+    private $loading = false;
 
     /** @var array */
     private static $loadedObjects = [];
@@ -137,18 +137,27 @@ class Object
     }
 
     /**
-     * @param int $id
      * @return string
      * @throws \RuntimeException
      */
-    protected function getTableKey(int $id): string
+    protected function getTableKey(): string
     {
         $class = static::class;
         if ($this->tableKey === null) {
             throw new \RuntimeException("Table key is not set for object $class");
         }
 
-        return $this->tableKey . '_' . $id;
+        return $this->tableKey;
+    }
+
+    /**
+     * @param int $id
+     * @return string
+     * @throws \RuntimeException
+     */
+    protected function getHashKey(int $id): string
+    {
+        return $this->getTableKey() . '_' . $id;
     }
 
     /**
@@ -219,10 +228,17 @@ class Object
     /**
      * @param string $name
      * @param mixed $value
+     * @throws \Exception
      */
     public function __set(string $name, $value = null)
     {
+        if ($this->$name === $value) {
+            return;
+        }
         $this->vars[$name] = $value;
+        if (!$this->loading) {
+            $this->save(true);
+        }
     }
 
     /**
@@ -233,7 +249,7 @@ class Object
     public function __get(string $name)
     {
         $class = static::class;
-        if (!array_key_exists($name, $this->vars)) {
+        if (!isset($this->$name)) {
             throw new \RuntimeException("Unknown column '$name' in object '$class'");
         }
 
@@ -249,9 +265,40 @@ class Object
         return array_key_exists($name, $this->vars);
     }
 
-    public function save()
+    /**
+     * @param bool $update
+     * @throws \Exception
+     */
+    public function save(bool $update = false): void
     {
+        $id = $this->getId();
+        if ($id === null) {
+            $id = $this->generateId();
+        }
 
+        $fieldName = $this->getFieldColumnName();
+        $valueName = $this->getValueColumnName();
+
+        $result = $this->getDbClient()->hSet(
+            $this->getHashKey($id), $this->getRawColumnValue($fieldName), $this->getRawColumnValue($valueName));
+        $class = static::class;
+        if ($result === 1 && $update) {
+            throw new \RuntimeException(
+                "Object $class($id) was updated, however DB says it was inserted as new. DB is probably corrupted");
+        }
+        if ($result === 0 && !$update) {
+            throw new \RuntimeException(
+                "Object $class($id) was inserted as new, however DB says it was updated. DB is probably corrupted");
+        }
+    }
+
+    /**
+     * @return int
+     * @throws \RuntimeException
+     */
+    private function generateId(): int
+    {
+        return $this->getSession()->generateNextId($this->getTableKey());
     }
 
     /**
@@ -263,13 +310,14 @@ class Object
      */
     public function load(int $id = null): ?self
     {
+        $this->loading = true;
         $id = $id ?? $this->getId();
 
         if ($id === null) {
             throw new \RuntimeException('ID value not found');
         }
 
-        $data = $this->getDbClient()->hGetAll($this->getTableKey($id));
+        $data = $this->getDbClient()->hGetAll($this->getHashKey($id));
         if ($data === null) {
             return null;
         }
@@ -277,6 +325,7 @@ class Object
         $data[$idColumn] = $id;
 
         $this->processData($data);
+        $this->loading = false;
 
         return $this;
     }
@@ -328,14 +377,47 @@ class Object
     }
 
     /**
+     * @param string $colName
+     * @return string|int|null
+     */
+    private function getRawColumnValue(string $colName)
+    {
+        if (!isset($this->$colName)) {
+            $class = static::class;
+            throw new \RuntimeException("Unknown column '$colName' provided to object '$class' ");
+        }
+        $col = $this->$colName;
+        $type = $this->varsToType[$colName];
+        switch (true) {
+            case (class_exists($type)):
+                /** @var Object $col */
+                return $col->getId();
+            case ($type === self::TYPE_DATE):
+                /** @var \DateTime $col */
+                return $col->getTimestamp();
+            default:
+                /** @var string|int|null */
+                return $col;
+        }
+    }
+
+    /**
      * @return \Kdyby\Redis\RedisClient
      * @throws \RuntimeException
      */
     protected function getDbClient(): \Kdyby\Redis\RedisClient
     {
-        $session = Session::getCurrent();
+        $session = $this->getSession();
 
         return $session->getClient();
     }
 
+    /**
+     * @return Session
+     * @throws \RuntimeException
+     */
+    protected function getSession(): Session
+    {
+        return Session::getCurrent();
+    }
 }

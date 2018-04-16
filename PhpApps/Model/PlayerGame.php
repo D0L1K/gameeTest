@@ -50,7 +50,7 @@ class PlayerGame extends Object
     public static function getByPlayerAndGame(Player $player, Game $game): ?self
     {
         $obj = new self();
-        $id = $obj->getDbClient()->hGet($obj->getTableKey($game->getId()), $player->getId());
+        $id = $obj->getDbClient()->hGet($obj->getHashKey($game->getId()), $player->getId());
         if ($id === null) {
             return null;
         }

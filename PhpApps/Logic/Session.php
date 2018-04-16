@@ -5,6 +5,8 @@ use Kdyby\Redis\RedisClient;
 
 class Session
 {
+    private const GENID_HASHKEY = 'idGenerator';
+
     /** @var RedisClient */
     private $dbClient;
     /** @var ConnectParams */
@@ -57,6 +59,31 @@ class Session
     public function getConnectParams(): ConnectParams
     {
         return $this->connectParams;
+    }
+
+    /**
+     * @param string $tableKey
+     * @return int
+     */
+    public function generateNextId(string $tableKey): int
+    {
+        $actual = $this->dbClient->hGet(self::GENID_HASHKEY, $tableKey);
+        if ($actual === null) {
+            return $this->createIdGenerator($tableKey);
+        }
+
+        return $this->dbClient->hIncrBy(self::GENID_HASHKEY, $tableKey, 1);
+    }
+
+    /**
+     * @param string $tableKey
+     * @return int
+     */
+    private function createIdGenerator(string $tableKey): int
+    {
+        $this->dbClient->hSet(self::GENID_HASHKEY, $tableKey, 1);
+
+        return 1;
     }
 
     /**
