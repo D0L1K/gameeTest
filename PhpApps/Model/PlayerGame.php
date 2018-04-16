@@ -21,7 +21,7 @@ class PlayerGame extends Object
         $this->setTableKey('playerGame');
         $this->addProperty('player', Player::class);
         $this->addProperty('game', Game::class, false, true);
-        $this->addProperty('value', self::TYPE_INT, false, false);
+        $this->addProperty('playerGameId', self::TYPE_INT, false, false);
         parent::initMapping();
     }
 }

@@ -10,7 +10,9 @@ use Logic\Session;
  */
 class Object
 {
-    private const ID_COL = 'id';
+    private const DEFAULT_ID_COL = 'id';
+    private const DEFAULT_FIELD_COL = 'field';
+    private const DEFAULT_VALUE_COL = 'value';
 
     protected const TYPE_INT = 0;
     protected const TYPE_STRING = 1;
@@ -20,14 +22,16 @@ class Object
     protected $vars = [];
     /** @var array */
     protected $varsToType = [];
-    /** @var array */
-    protected $varsFields = [];
     /** @var bool */
     protected $save = false;
     /** @var string|null */
     protected $tableKey;
     /** @var string|null */
-    protected $idColumn;
+    private $idColumn;
+    /** @var string|null */
+    private $fieldColumn;
+    /** @var string|null */
+    private $valueColumn;
 
     /** @var array */
     private static $loadedObjects = [];
@@ -71,8 +75,22 @@ class Object
      */
     protected function initMapping(): void
     {
-        if ($this->getIdColumnName() === self::ID_COL) {
-            $this->addProperty('id', self::TYPE_INT, false, true);
+        $this->initDefault();
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    private function initDefault(): void
+    {
+        if ($this->getIdColumnName() === self::DEFAULT_ID_COL) {
+            $this->addProperty(self::DEFAULT_ID_COL, self::TYPE_INT, false, true);
+        }
+        if ($this->getFieldColumnName() === self::DEFAULT_FIELD_COL) {
+            $this->addProperty(self::DEFAULT_FIELD_COL, self::TYPE_STRING);
+        }
+        if ($this->getValueColumnName() === self::DEFAULT_VALUE_COL) {
+            $this->addProperty(self::DEFAULT_VALUE_COL, self::TYPE_STRING, false, false);
         }
     }
 
@@ -91,7 +109,23 @@ class Object
      */
     private function getIdColumnName(): string
     {
-        return $this->idColumn ?? self::ID_COL;
+        return $this->idColumn ?? self::DEFAULT_ID_COL;
+    }
+
+    /**
+     * @return null|string
+     */
+    private function getFieldColumnName(): string
+    {
+        return $this->fieldColumn ?? self::DEFAULT_FIELD_COL;
+    }
+
+    /**
+     * @return null|string
+     */
+    private function getValueColumnName(): string
+    {
+        return $this->valueColumn ?? self::DEFAULT_VALUE_COL;
     }
 
     /**
@@ -129,9 +163,14 @@ class Object
         if ($isId) {
             $this->addIdColumn($name, $type);
         }
+        if ($isField) {
+            $this->addFieldColumn($name);
+        }
+        if (!$isId && !$isField) {
+            $this->addValueColumn($name);
+        }
         $this->vars[$name] = null;
         $this->varsToType[$name] = $type;
-        $this->varsFields[$name] = $isField;
     }
 
     /**
@@ -149,6 +188,32 @@ class Object
             throw new \InvalidArgumentException('ID column has to be int or Model object');
         }
         $this->idColumn = $name;
+    }
+
+    /**
+     * @param string $name
+     * @throws \InvalidArgumentException
+     */
+    private function addFieldColumn(string $name): void
+    {
+        if ($this->fieldColumn !== null) {
+            throw new \InvalidArgumentException(
+                "Field column is already set. Actual: {$this->fieldColumn} Added: $name");
+        }
+        $this->fieldColumn = $name;
+    }
+
+    /**
+     * @param string $name
+     * @throws \InvalidArgumentException
+     */
+    private function addValueColumn(string $name): void
+    {
+        if ($this->valueColumn !== null) {
+            throw new \InvalidArgumentException(
+                "Value column is already set. Actual: {$this->valueColumn} Added: $name");
+        }
+        $this->valueColumn = $name;
     }
 
     /**
@@ -209,7 +274,7 @@ class Object
             return null;
         }
         $idColumn = $this->getIdColumnName();
-        $this->$idColumn = $id;
+        $data[$idColumn] = $id;
 
         $this->processData($data);
 
@@ -227,6 +292,11 @@ class Object
         foreach ($data as $key => $value) {
             if (isset($this->$key)) {
                 $this->$key = $this->processValue($key, $value);
+            } else {
+                $fieldColumn = $this->getFieldColumnName();
+                $this->$fieldColumn = $this->processValue($fieldColumn, $key);
+                $valueColumn = $this->getValueColumnName();
+                $this->$valueColumn = $this->processValue($valueColumn, $value);
             }
         }
     }
@@ -242,16 +312,16 @@ class Object
     private function processValue(string $key, $value)
     {
         $type = $this->varsToType[$key];
-        switch ($type) {
-            case self::TYPE_INT:
+        switch (true) {
+            case ($type ===self::TYPE_INT):
                 return $value === null ? null : (int)$value;
-            case self::TYPE_STRING:
+            case ($type ===self::TYPE_STRING):
                 return $value === null ? null : (string)$value;
-            case self::TYPE_DATE:
+            case ($type ===self::TYPE_DATE):
                 return $value === null ? null : (new \DateTime)->setTimestamp($value);
             default:
                 if (class_exists($type)) {
-                    return static::getById($value);
+                    return $type::getById($value);
                 }
                 throw new \InvalidArgumentException("Unknown column '$key' (type: $type, value: $value)");
         }
