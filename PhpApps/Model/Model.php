@@ -30,6 +30,24 @@ class Model
     /** @var array */
     private static $loadedObjects = [];
 
+    /**
+     * @param int $id
+     * @return static
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
+     */
+    public static function getById(int $id): self
+    {
+        if (isset(self::$loadedObjects[static::class][$id])) {
+            return self::$loadedObjects[static::class][$id];
+        }
+        $obj = new static();
+        $obj->load($id);
+        self::$loadedObjects[static::class][$id] = $obj;
+
+        return $obj;
+    }
+
     public function __construct()
     {
         $this->initMapping();
@@ -225,24 +243,6 @@ class Model
         $id = $id ?? $this->getId();
 
         return $this->getTableKey($id);
-    }
-
-    /**
-     * @param int $id
-     * @return static
-     * @throws \InvalidArgumentException
-     * @throws \RuntimeException
-     */
-    public static function getById(int $id): self
-    {
-        if (isset(self::$loadedObjects[static::class][$id])) {
-            return self::$loadedObjects[static::class][$id];
-        }
-        $obj = new static();
-        $obj->load($id);
-        self::$loadedObjects[static::class][$id] = $obj;
-
-        return $obj;
     }
 
     /**

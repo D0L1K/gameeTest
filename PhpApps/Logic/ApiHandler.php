@@ -24,11 +24,13 @@ class ApiHandler
      * ApiHandler constructor.
      * @param Container $container
      * @param ApiRouter $apiRouter
+     * @param Session $session
      */
-    public function __construct(Container $container, ApiRouter $apiRouter)
+    public function __construct(Container $container, ApiRouter $apiRouter, Session $session)
     {
         $this->container = $container;
         $this->apiRouter = $apiRouter;
+        // @codesmell: Initializing of Session for every API call
     }
 
     /**

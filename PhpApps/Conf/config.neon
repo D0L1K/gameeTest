@@ -7,3 +7,5 @@ services:
 	router: Logic\Factories\RouterFactory::createRouter
 	- Logic\ApiRouter
 	- Logic\ApiHandler
+	- Logic\ConnectParams
+	- Logic\Session
