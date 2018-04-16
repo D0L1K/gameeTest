@@ -27,6 +27,7 @@ class Score extends Object
      * @param PlayerGame $playerGame
      * @param int $score
      * @return Score
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
     public static function create(PlayerGame $playerGame, int $score): self

@@ -21,10 +21,13 @@ class ObjectNotFoundException extends \Exception
     public function __construct(
         int $id,
         string $model,
-        string $message = 'Object not foung',
+        string $message = null,
         int $code = 404,
         Throwable $previous = null)
     {
+        if ($message === null) {
+            $message = "Object $model($id) not found";
+        }
         parent::__construct($message, $code, $previous);
         $this->id = $id;
         $this->model = $model;

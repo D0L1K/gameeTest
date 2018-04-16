@@ -101,7 +101,7 @@ class Object
     {
         $columnName = $this->getIdColumnName();
 
-        return $this->$columnName;
+        return $this->getRawColumnValue($columnName);
     }
 
     /**
@@ -267,7 +267,7 @@ class Object
 
     /**
      * @param bool $update
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function save(bool $update = false): void
     {
@@ -318,7 +318,7 @@ class Object
         }
 
         $data = $this->getDbClient()->hGetAll($this->getHashKey($id));
-        if ($data === null) {
+        if (\count($data) === 0) {
             return null;
         }
         $idColumn = $this->getIdColumnName();
