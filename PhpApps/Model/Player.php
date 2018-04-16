@@ -10,11 +10,13 @@ namespace Model;
  */
 class Player extends Model
 {
-
+    /**
+     * @throws \InvalidArgumentException
+     */
     protected function initMapping(): void
     {
-        parent::initMapping();
         $this->setTableKey('players');
         $this->addProperty('name', Model::TYPE_STRING);
+        parent::initMapping();
     }
 }

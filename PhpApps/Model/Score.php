@@ -6,36 +6,21 @@ namespace Model;
  * @package Model
  *
  * @property int $id
- * @property Player $player
- * @property Game $game
+ * @property PlayerGame $playerGame
  * @property int $score
  * @property \DateTime $date
  */
 class Score extends Model
 {
+    /**
+     * @throws \InvalidArgumentException
+     */
     protected function initMapping(): void
     {
-        parent::initMapping();
         $this->setTableKey('scores');
-        $this->addProperty('player', Player::class, 'playerId');
-        $this->addProperty('game', Game::class, 'gameId');
-        $this->addProperty('score', Model::TYPE_INT);
+        $this->addProperty('playerGame', PlayerGame::class, false, true);
+        $this->addProperty('score', Model::TYPE_INT, false, false);
         $this->addProperty('date', Model::TYPE_DATE);
-    }
-
-    /**
-     * @return string
-     */
-    protected function getTableKey(): string
-    {
-        return $this->getTableKey() . '_' . $this->game->getId();
-    }
-
-    /**
-     * @return string
-     */
-    protected function getHashKey(): string
-    {
-        return $this->player->getId() . '_' . $this->date->getTimestamp();
+        parent::initMapping();
     }
 }

@@ -31,7 +31,7 @@ class Session
 
     /**
      * @return Session
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public static function getCurrent(): Session
     {
