@@ -9,15 +9,15 @@ use Model\Score as ScoreModel;
 class Score
 {
     /**
-     * @param int $gameId
+     * @param int $scoreId
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws ObjectNotFoundException
      */
-    public function get(int $gameId): array
+    public function get(int $scoreId): array
     {
-        $score = ScoreModel::getById($gameId);
+        $score = ScoreModel::getById($scoreId);
 
         return [1];
     }
