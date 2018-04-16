@@ -32,6 +32,7 @@ class Score extends Object
      */
     public static function create(PlayerGame $playerGame, int $score): self
     {
+        // TODO: do not save after every set
         $obj = new self();
         $obj->playerGame = $playerGame;
         $obj->score = $score;

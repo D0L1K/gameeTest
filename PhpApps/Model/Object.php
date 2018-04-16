@@ -392,11 +392,11 @@ class Object
             case (class_exists($type)):
                 /** @var Object $col */
                 return $col->getId();
-            case ($type === self::TYPE_DATE):
+            case ($type === self::TYPE_DATE && $col !== null):
                 /** @var \DateTime $col */
                 return $col->getTimestamp();
             default:
-                /** @var string|int|null */
+                /** @var string|int|null $col */
                 return $col;
         }
     }
