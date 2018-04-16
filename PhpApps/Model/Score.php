@@ -10,7 +10,7 @@ namespace Model;
  * @property int $score
  * @property \DateTime $date
  */
-class Score extends Model
+class Score extends Object
 {
     /**
      * @throws \InvalidArgumentException
@@ -19,8 +19,8 @@ class Score extends Model
     {
         $this->setTableKey('scores');
         $this->addProperty('playerGame', PlayerGame::class, false, true);
-        $this->addProperty('score', Model::TYPE_INT, false, false);
-        $this->addProperty('date', Model::TYPE_DATE);
+        $this->addProperty('score', Object::TYPE_INT, false, false);
+        $this->addProperty('date', Object::TYPE_DATE);
         parent::initMapping();
     }
 }

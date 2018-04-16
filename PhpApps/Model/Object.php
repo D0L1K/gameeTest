@@ -1,12 +1,14 @@
 <?php
 namespace Model;
+
+use Logic\Exceptions\ObjectNotFoundException;
 use Logic\Session;
 
 /**
- * Class AbstractModel
+ * Class Object
  * @package Model
  */
-class Model
+class Object
 {
     private const ID_COL = 'id';
 
@@ -32,23 +34,34 @@ class Model
 
     /**
      * @param int $id
+     * @param bool $throwIfNull
      * @return static
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
+     * @throws ObjectNotFoundException
      */
-    public static function getById(int $id): self
+    public static function getById(int $id, bool $throwIfNull = true): self
     {
         if (isset(self::$loadedObjects[static::class][$id])) {
             return self::$loadedObjects[static::class][$id];
         }
-        $obj = new static();
-        $obj->load($id);
-        self::$loadedObjects[static::class][$id] = $obj;
-
-        return $obj;
+        $object = new static();
+        $object = $object->load($id);
+        if ($object !== null) {
+            return self::$loadedObjects[static::class][$id] = $object;
+        }
+        if (!$throwIfNull) {
+            return null;
+        }
+        throw new ObjectNotFoundException($id, static::class);
     }
 
-    public function __construct()
+    /**
+     * Object constructor.
+     * Do not allow to create objects from New -> protected
+     * @throws \InvalidArgumentException
+     */
+    protected function __construct()
     {
         $this->initMapping();
     }
@@ -59,7 +72,7 @@ class Model
     protected function initMapping(): void
     {
         if ($this->getIdColumnName() === self::ID_COL) {
-            $this->addProperty('id', self::TYPE_INT);
+            $this->addProperty('id', self::TYPE_INT, false, true);
         }
     }
 
@@ -181,13 +194,22 @@ class Model
      * @return self|null
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
+     * @throws ObjectNotFoundException
      */
     public function load(int $id = null): ?self
     {
-        $data = $this->getDbClient()->hGetAll($this->getHashKey($id));
+        $id = $id ?? $this->getId();
+
+        if ($id === null) {
+            throw new \RuntimeException('ID value not found');
+        }
+
+        $data = $this->getDbClient()->hGetAll($this->getTableKey($id));
         if ($data === null) {
             return null;
         }
+        $idColumn = $this->getIdColumnName();
+        $this->$idColumn = $id;
 
         $this->processData($data);
 
@@ -198,6 +220,7 @@ class Model
      * @param array $data
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
+     * @throws ObjectNotFoundException
      */
     private function processData(array $data): void
     {
@@ -214,6 +237,7 @@ class Model
      * @return mixed
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
+     * @throws ObjectNotFoundException
      */
     private function processValue(string $key, $value)
     {
@@ -231,18 +255,6 @@ class Model
                 }
                 throw new \InvalidArgumentException("Unknown column '$key' (type: $type, value: $value)");
         }
-    }
-
-    /**
-     * @param int|null $id
-     * @return string
-     * @throws \RuntimeException
-     */
-    protected function getHashKey(int $id = null): string
-    {
-        $id = $id ?? $this->getId();
-
-        return $this->getTableKey($id);
     }
 
     /**

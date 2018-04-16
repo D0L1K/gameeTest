@@ -11,7 +11,7 @@ namespace Model;
  * @property int $score
  * @property int $value
  */
-class PlayerGame extends Model
+class PlayerGame extends Object
 {
     /**
      * @throws \InvalidArgumentException

@@ -8,7 +8,7 @@ namespace Model;
  * @var int $id
  * @var string $name
  */
-class Game extends Model
+class Game extends Object
 {
     /**
      * @throws \InvalidArgumentException
@@ -16,7 +16,7 @@ class Game extends Model
     protected function initMapping(): void
     {
         $this->setTableKey('games');
-        $this->addProperty('name', Model::TYPE_STRING);
+        $this->addProperty('name', Object::TYPE_STRING);
         parent::initMapping();
     }
 }
