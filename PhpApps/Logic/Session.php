@@ -39,7 +39,8 @@ class Session
             $this->connectParams->isPersistent()
         );
         // TODO: connect with first request, not everytime on start
-        $this->dbClient->connect();
+        // note: have to swallow warning about compatible declaration
+        @$this->dbClient->connect();
     }
 
     /**
