@@ -1,6 +1,9 @@
 <?php
 namespace Model;
 
+use Model\Orm\Column;
+use Model\Orm\Object;
+
 /**
  * Class Game
  * @package Model
@@ -16,7 +19,7 @@ class Game extends Object
     protected function initMapping(): void
     {
         $this->setTableKey('games');
-        $this->addProperty('name', Object::TYPE_STRING);
+        $this->addProperty('name', Column::TYPE_STRING);
         parent::initMapping();
     }
 }

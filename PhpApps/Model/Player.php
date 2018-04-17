@@ -1,6 +1,9 @@
 <?php
 namespace Model;
 
+use Model\Orm\Column;
+use Model\Orm\Object;
+
 /**
  * Class Player
  * @package Model
@@ -16,7 +19,8 @@ class Player extends Object
     protected function initMapping(): void
     {
         $this->setTableKey('players');
-        $this->addProperty('name', Object::TYPE_STRING);
+        $this->addProperty('name', Column::TYPE_STRING);
+        $this->addProperty('city', Column::TYPE_STRING);
         parent::initMapping();
     }
 }

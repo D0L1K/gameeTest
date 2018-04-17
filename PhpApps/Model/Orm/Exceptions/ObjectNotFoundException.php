@@ -1,5 +1,5 @@
 <?php
-namespace Logic\Exceptions;
+namespace Model\Orm\Exceptions;
 
 use Throwable;
 

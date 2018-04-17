@@ -1,6 +1,9 @@
 <?php
 namespace Model;
 
+use Model\Orm\Column;
+use Model\Orm\Object;
+
 /**
  * Class Score
  * @package Model
@@ -17,9 +20,8 @@ class Score extends Object
     protected function initMapping(): void
     {
         $this->setTableKey('scores');
-        $this->addProperty('playerGame', PlayerGame::class, false, true);
-        $this->addProperty('score', Object::TYPE_INT, false, false);
-        $this->addProperty('date', Object::TYPE_DATE);
+        $this->addProperty('date', Column::TYPE_DATE, false, true);
+        $this->addProperty('score', Column::TYPE_INT, true);
         parent::initMapping();
     }
 

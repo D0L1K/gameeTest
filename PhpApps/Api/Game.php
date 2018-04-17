@@ -2,7 +2,7 @@
 
 namespace Api;
 
-use Logic\Exceptions\ObjectNotFoundException;
+use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Game as GameModel;
 
 class Game

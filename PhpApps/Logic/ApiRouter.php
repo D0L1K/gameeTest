@@ -32,7 +32,7 @@ class ApiRouter
 
         $this->routes = [
             'score' => Score::class,
-            'players' => Player::class,
+            'player' => Player::class,
             'game' => Game::class,
             'playergame' => PlayerGame::class
         ];

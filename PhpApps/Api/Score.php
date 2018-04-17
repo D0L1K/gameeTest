@@ -3,7 +3,7 @@
 namespace Api;
 
 use Nette\Application\BadRequestException;
-use Logic\Exceptions\ObjectNotFoundException;
+use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Game as GameModel;
 use Model\Player as PlayerModel;
 use Model\PlayerGame as PlayerGameModel;
@@ -13,14 +13,15 @@ class Score
 {
     /**
      * @param int $scoreId
+     * @param int $timestamp
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
-     * @throws ObjectNotFoundException
+     * @throws \Model\Orm\Exceptions\ObjectNotFoundException
      */
-    public function get(int $scoreId): array
+    public function get(int $scoreId, int $timestamp): array
     {
-        $score = ScoreModel::getById($scoreId);
+        $score = ScoreModel::getByIdAndFkId($scoreId, $timestamp);
 
         return [1];
     }

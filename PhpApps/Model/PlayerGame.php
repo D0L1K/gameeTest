@@ -1,6 +1,9 @@
 <?php
 namespace Model;
 
+use Model\Orm\Column;
+use Model\Orm\Object;
+
 /**
  * Class Score
  * @package Model
@@ -17,9 +20,9 @@ class PlayerGame extends Object
     protected function initMapping(): void
     {
         $this->setTableKey('playerGame');
-        $this->addProperty('player', Player::class);
-        $this->addProperty('game', Game::class, false, true);
-        $this->addProperty('playerGameId', self::TYPE_INT, false, false);
+        $this->addProperty('game', Game::class, false, false, true);
+        $this->addProperty('player', Player::class, false, true);
+        $this->addProperty('scoreId', Column::TYPE_INT);
         parent::initMapping();
     }
 
@@ -37,24 +40,5 @@ class PlayerGame extends Object
         $obj->save();
 
         return $obj;
-    }
-
-    /**
-     * @param Player $player
-     * @param Game $game
-     * @return self|null
-     * @throws \InvalidArgumentException
-     * @throws \RuntimeException
-     * @throws \Logic\Exceptions\ObjectNotFoundException
-     */
-    public static function getByPlayerAndGame(Player $player, Game $game): ?self
-    {
-        $obj = new self();
-        $id = $obj->getDbClient()->hGet($obj->getHashKey($game->getId()), $player->getId());
-        if ($id === null) {
-            return null;
-        }
-
-        return $obj->load($id);
     }
 }

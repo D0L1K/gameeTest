@@ -2,7 +2,7 @@
 
 namespace Api;
 
-use Logic\Exceptions\ObjectNotFoundException;
+use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Player as PlayerModel;
 
 class Player
@@ -12,7 +12,7 @@ class Player
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
-     * @throws ObjectNotFoundException
+     * @throws \Model\Orm\Exceptions\ObjectNotFoundException
      */
     public function get(int $playerId): array
     {
