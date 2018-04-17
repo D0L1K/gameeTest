@@ -20,8 +20,10 @@ class Score extends Object
     protected function initMapping(): void
     {
         $this->setTableKey('scores');
+        $this->addProperty('playerGame', Column::TYPE_INT, false, false, true);
         $this->addProperty('date', Column::TYPE_DATE, false, true);
         $this->addProperty('score', Column::TYPE_INT, true);
+        $this->setNoGenId();
         parent::initMapping();
     }
 
@@ -31,6 +33,7 @@ class Score extends Object
      * @return Score
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @throws Orm\Exceptions\ObjectNotFoundException
      */
     public static function create(PlayerGame $playerGame, int $score): self
     {

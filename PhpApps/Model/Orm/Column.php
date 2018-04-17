@@ -132,11 +132,17 @@ class Column
     private function processValue($value)
     {
         switch (true) {
+            case ($value instanceof Object):
+                return $value;
             case ($this->type === self::TYPE_INT):
                 return $value === null ? null : (int)$value;
             case ($this->type === self::TYPE_STRING):
                 return $value === null ? null : (string)$value;
             case ($this->type === self::TYPE_DATE):
+                if ($value instanceof \DateTime) {
+                    return $value;
+                }
+
                 return $value === null ? null : (new \DateTime)->setTimestamp($value);
             default:
                 // TODO: check if $this->>type is Object

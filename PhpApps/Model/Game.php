@@ -8,8 +8,8 @@ use Model\Orm\Object;
  * Class Game
  * @package Model
  *
- * @var int $id
- * @var string $name
+ * @property int $id
+ * @property string $name
  */
 class Game extends Object
 {
@@ -21,5 +21,21 @@ class Game extends Object
         $this->setTableKey('games');
         $this->addProperty('name', Column::TYPE_STRING);
         parent::initMapping();
+    }
+
+    /**
+     * @param string $name
+     * @return self
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws Orm\Exceptions\ObjectNotFoundException
+     */
+    public static function create(string $name): self
+    {
+        $obj = new self();
+        $obj->name = $name;
+        $obj->save();
+
+        return $obj;
     }
 }

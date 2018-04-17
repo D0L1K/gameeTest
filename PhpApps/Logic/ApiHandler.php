@@ -55,7 +55,7 @@ class ApiHandler
             $methodResult = \call_user_func_array([$classObj, $method], $orderedParams);
             $response->setResult($methodResult);
         } catch (\Exception $e) {
-            if (!$e instanceof JsonRpcException) {
+            if (!($e instanceof JsonRpcException)) {
                 $e = new JsonRpcException(IResponse::S500_INTERNAL_SERVER_ERROR, $e->getMessage());
             }
             $response->setError($e);

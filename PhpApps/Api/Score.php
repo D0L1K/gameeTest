@@ -30,22 +30,22 @@ class Score
      * @param int $gameId
      * @param int $playerId
      * @param int $score
-     * @return int
+     * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws ObjectNotFoundException
      */
-    public function insert(int $gameId, int $playerId, int $score): int
+    public function insert(int $gameId, int $playerId, int $score): array
     {
         $player = PlayerModel::getById($playerId);
         $game = GameModel::getById($gameId);
-        $playerGame = PlayerGameModel::getByPlayerAndGame($player, $game);
+        $playerGame = PlayerGameModel::getByIdAndFkId($gameId, $playerId);
         if ($playerGame === null) {
             $playerGame = PlayerGameModel::create($player, $game);
         }
-        ScoreModel::create($playerGame, $score);
+        $scoreObj = ScoreModel::create($playerGame, $score);
 
-        return 1;
+        return ['scoreId' => $playerGame->scoreId, 'date' => $scoreObj->date, 'insertedScore' => $scoreObj->score];
     }
 
     public function getTop(int $first = null)

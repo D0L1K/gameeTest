@@ -22,8 +22,12 @@ class Object
     private $idColumn;
     /** @var Column|null */
     private $foreignKeyColumn;
+    /** @var string|null */
+    private $genIdColumnName;
     /** @var bool */
-    private $loading = false;
+    private $genId = true;
+    /** @var bool */
+    private $initializing;
 
     /** @var array */
     private static $loadedObjects = [];
@@ -93,6 +97,7 @@ class Object
     protected function __construct()
     {
         $this->initMapping();
+        $this->initializing = true;
     }
 
     ////////////////////
@@ -114,6 +119,9 @@ class Object
     {
         if ($this->idColumn === null) {
             $this->addProperty(self::DEFAULT_ID_COL, Column::TYPE_INT, false, false, true);
+        }
+        if ($this->genId && $this->genIdColumnName === null) {
+            $this->setGenIdColumnName(self::DEFAULT_ID_COL);
         }
     }
 
@@ -194,6 +202,28 @@ class Object
         $this->valueColumns[$column->getName()] = $column;
     }
 
+
+    /**
+     * Disables automatic generating of ID
+     *
+     * @return void
+     */
+    protected function setNoGenId(): void
+    {
+        $this->genId = false;
+    }
+
+    /**
+     * @param string $columnName
+     */
+    protected function setGenIdColumnName(string $columnName): void
+    {
+        if (!isset($this->$columnName)) {
+            throw new \InvalidArgumentException("Unknown column ($columnName) provided to be generated as ID");
+        }
+        $this->genIdColumnName = $columnName;
+    }
+
     /**
      * @return bool
      */
@@ -217,7 +247,7 @@ class Object
             return;
         }
         $this->columns[$name]->setValue($value);
-        if (!$this->loading) {
+        if (!$this->initializing) {
             $this->save(true);
         }
     }
@@ -293,26 +323,64 @@ class Object
     ////////////////////
 
     /**
-     * @param bool $update
+     * @param bool $isUpdate
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
+     * @throws ObjectNotFoundException
+     */
+    public function save(bool $isUpdate = false): void
+    {
+        $genIdColName = $this->genIdColumnName;
+        if ($this->genId && $genIdColName !== null && $this->$genIdColName === null) {
+            $this->$genIdColName = $this->generateId();
+        }
+        $id = $this->getId();
+
+        if ($this->foreignKeyColExist()) {
+            // ValueColumn should be everytime only one in this case
+            foreach ($this->valueColumns as $column) {
+                $this->executeSave($id, $this->foreignKeyColumn->getRawValue(), $column->getRawValue(), $isUpdate);
+            }
+        } else {
+            foreach ($this->valueColumns as $column) {
+                $this->executeSave($id, $column->getName(), $column->getRawValue(), $isUpdate);
+            }
+        }
+        if (!$isUpdate) {
+            $this->idColumn->setValue($id);
+            $this->initializing = false;
+        }
+    }
+
+    /**
+     * @param int $id
+     * @param $fieldName
+     * @param $fieldValue
+     * @param bool $isUpdate
      * @throws \RuntimeException
      */
-    public function save(bool $update = false): void
+    private function executeSave(int $id, $fieldName, $fieldValue, bool $isUpdate): void
     {
-        $id = $this->getId();
-        if ($id === null) {
-            $id = $this->generateId();
-        }
+        $result = $this->getDbClient()->hSet($this->getHashKey($id), $fieldName, $fieldValue);
+        $this->checkResult($result, $isUpdate, $id);
+    }
 
-        $result = $this->getDbClient()->hSet(
-            $this->getHashKey($id), $this->getRawColumnValue($fieldName), $this->getRawColumnValue($valueName));
+    /**
+     * @param int $result
+     * @param bool $isUpdate
+     * @param int $id
+     * @throws \RuntimeException
+     */
+    private function checkResult(int $result, bool $isUpdate, int $id): void
+    {
         $class = static::class;
-        if ($result === 1 && $update) {
+        if ($result === 1 && $isUpdate) {
             throw new \RuntimeException(
                 "Object $class($id) was updated, however DB says it was inserted as new. DB is probably corrupted");
         }
-        if ($result === 0 && !$update) {
+        if ($result === 0 && !$isUpdate) {
             throw new \RuntimeException(
-                "Object $class($id) was inserted as new, however DB says it was updated. DB is probably corrupted");
+                "Object $class($id) was inserted as new, however DB says it was updated. You are inserting already existing values");
         }
     }
 
@@ -326,20 +394,19 @@ class Object
      */
     public function load(int $id = null, int $foreignKeyId = null): ?self
     {
-        $this->loading = true;
         $id = $id ?? $this->getId();
 
         if ($id === null) {
             throw new \RuntimeException('ID value not found');
         }
 
-        if ($this->foreignKeyColumn !== null) {
+        if ($this->foreignKeyColExist()) {
             if ($foreignKeyId === null) {
                 throw new \RuntimeException('Foreign key ID must be provided');
             }
             $this->foreignKeyColumn->setValue($foreignKeyId);
             $data = $this->getDbClient()->hGet($this->getHashKey($id), $this->foreignKeyColumn->getRawValue());
-            // value column should be everytime only one in this case
+            // ValueColumn should be everytime only one in this case
             foreach ($this->valueColumns as $valueColumn) {
                 $valueColumn->setValue($data);
             }
@@ -358,7 +425,7 @@ class Object
         $this->idColumn->setValue($id);
 
 
-        $this->loading = false;
+        $this->initializing = false;
 
         return $this;
     }

@@ -20,4 +20,17 @@ class Game
 
         return [1];
     }
+
+    /**
+     * @param string $name
+     * @return array
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
+    public function insert(string $name): array
+    {
+        $game = GameModel::create($name);
+
+        return ['gameId' => $game->getId()];
+    }
 }

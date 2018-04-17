@@ -22,4 +22,18 @@ class Player
 
         return [1];
     }
+
+    /**
+     * @param string $name
+     * @param string|null $city
+     * @return array
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     */
+    public function insert(string $name, string $city = null): array
+    {
+        $player = PlayerModel::create($name, $city);
+
+        return ['playerId' => $player->getId()];
+    }
 }
