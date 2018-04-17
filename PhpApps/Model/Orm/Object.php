@@ -16,8 +16,6 @@ class Object
     protected $columns;
     /** @var Column[] */
     protected $valueColumns = [];
-    /** @var string|null */
-    protected $tableKey;
     /** @var Column|null */
     private $idColumn;
     /** @var Column|null */
@@ -31,6 +29,8 @@ class Object
 
     /** @var array */
     private static $loadedObjects = [];
+    /** @var string|null */
+    protected static $tableKey;
 
     /**
      * @param int $id
@@ -293,29 +293,21 @@ class Object
      * @return string
      * @throws \RuntimeException
      */
-    protected function getHashKey(int $id): string
+    public static function getHashKey(int $id): string
     {
-        return $this->getTableKey() . '_' . $id;
+        return static::getTableKey() . '_' . $id;
     }
 
     /**
-     * @param string $tableKey
+     * @return null|string
      */
-    protected function setTableKey(string $tableKey): void
+    public static function getTableKey(): ?string
     {
-        $this->tableKey = $tableKey;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getTableKey(): string
-    {
-        if ($this->tableKey === null) {
+        if (static::$tableKey === null) {
             throw new \RuntimeException('Table key is not set for ' . static::class);
         }
 
-        return $this->tableKey;
+        return static::$tableKey;
     }
 
     ////////////////////
@@ -361,7 +353,7 @@ class Object
      */
     private function executeSave(int $id, $fieldName, $fieldValue, bool $isUpdate): void
     {
-        $result = $this->getDbClient()->hSet($this->getHashKey($id), $fieldName, $fieldValue);
+        $result = $this->getDbClient()->hSet(static::getHashKey($id), $fieldName, $fieldValue);
         $this->checkResult($result, $isUpdate, $id);
     }
 
@@ -405,13 +397,13 @@ class Object
                 throw new \RuntimeException('Foreign key ID must be provided');
             }
             $this->foreignKeyColumn->setValue($foreignKeyId);
-            $data = $this->getDbClient()->hGet($this->getHashKey($id), $this->foreignKeyColumn->getRawValue());
+            $data = $this->getDbClient()->hGet(static::getHashKey($id), $this->foreignKeyColumn->getRawValue());
             // ValueColumn should be everytime only one in this case
             foreach ($this->valueColumns as $valueColumn) {
                 $valueColumn->setValue($data);
             }
         } else {
-            $data = $this->getDbClient()->hGetAll($this->getHashKey($id));
+            $data = $this->getDbClient()->hGetAll(static::getHashKey($id));
             foreach ($data as $name => $value) {
                 if (isset($this->$name)) {
                     $this->$name = $value;
@@ -436,7 +428,7 @@ class Object
      */
     private function generateId(): int
     {
-        return $this->getSession()->generateNextId($this->getTableKey());
+        return $this->getSession()->generateNextId(static::getTableKey());
     }
 
     ////////////////////

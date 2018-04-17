@@ -13,12 +13,13 @@ use Model\Orm\Object;
  */
 class Game extends Object
 {
+    protected static $tableKey = 'games';
+
     /**
      * @throws \InvalidArgumentException
      */
     protected function initMapping(): void
     {
-        $this->setTableKey('games');
         $this->addProperty('name', Column::TYPE_STRING);
         parent::initMapping();
     }

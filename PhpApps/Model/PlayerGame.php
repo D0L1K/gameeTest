@@ -14,12 +14,13 @@ use Model\Orm\Object;
  */
 class PlayerGame extends Object
 {
+    protected static $tableKey = 'playerGame';
+
     /**
      * @throws \InvalidArgumentException
      */
     protected function initMapping(): void
     {
-        $this->setTableKey('playerGame');
         $this->addProperty('game', Game::class, false, false, true);
         $this->addProperty('player', Player::class, false, true);
         $this->addProperty('scoreId', Column::TYPE_INT, true, false, false);

@@ -2,7 +2,8 @@
 
 namespace Api;
 
-use Nette\Application\BadRequestException;
+use Logic\ScoreList;
+use Logic\Session;
 use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Game as GameModel;
 use Model\Player as PlayerModel;
@@ -48,11 +49,31 @@ class Score
         return ['scoreId' => $playerGame->scoreId, 'date' => $scoreObj->date, 'insertedScore' => $scoreObj->score];
     }
 
-    public function getTop(int $first = null)
+    /**
+     * @param int $gameId
+     * @param int|null $top
+     * @return array
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
+     */
+    public function getTop(int $gameId, int $top = null): array
     {
-        if ($first === null) {
-            $first = 10;
+        if ($top === null) {
+            $top = 10;
         }
-        throw new BadRequestException('Test exception');
+        $game = GameModel::getById($gameId);
+        $session = $this->getSession();
+        $scoreList = new ScoreList($session->getClient());
+
+        return ['gameId' => $game->getId(), 'scoreList' => $scoreList->getTopByGame($game, $top)];
+    }
+
+    /**
+     * @return Session
+     */
+    private function getSession(): Session
+    {
+        return Session::getCurrent();
     }
 }
