@@ -26,6 +26,7 @@ class Game
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
      */
     public function insert(string $name): array
     {

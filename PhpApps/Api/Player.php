@@ -29,6 +29,7 @@ class Player
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
      */
     public function insert(string $name, string $city = null): array
     {
