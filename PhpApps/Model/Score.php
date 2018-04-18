@@ -22,7 +22,7 @@ class Score extends Object
     protected function initMapping(): void
     {
         $this->addProperty('scoreId', Column::TYPE_INT, false, false, true);
-        $this->addProperty('date', Column::TYPE_DATE, false, true);
+        $this->addProperty('date', Column::TYPE_STRING, false, true);
         $this->addProperty('score', Column::TYPE_INT, true);
         $this->setNoGenId();
         parent::initMapping();
@@ -42,9 +42,17 @@ class Score extends Object
         $obj = new self();
         $obj->scoreId = $scoreMap;
         $obj->score = $score;
-        $obj->setRawValue('date', microtime(true));
+        $obj->date = microtime(true);
         $obj->save();
 
         return $obj;
+    }
+
+    /**
+     * @return bool|\DateTime
+     */
+    public function getDateTime()
+    {
+        return \DateTime::createFromFormat('U.u', $this->date);
     }
 }

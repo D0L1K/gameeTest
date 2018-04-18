@@ -143,7 +143,7 @@ class Column
                     return $value;
                 }
 
-                return $value === null ? null : (new \DateTime)->setTimestamp($value);
+                return $value === null ? null : \DateTime::createFromFormat('U.u', $value);
             default:
                 // TODO: check if $this->>type is Object
                 if (\class_exists($this->type)) {

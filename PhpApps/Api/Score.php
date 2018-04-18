@@ -17,13 +17,13 @@ class Score
 {
     /**
      * @param int $scoreId
-     * @param int $timestamp
+     * @param string $timestamp
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws \Model\Orm\Exceptions\ObjectNotFoundException
      */
-    public function get(int $scoreId, int $timestamp): array
+    public function get(int $scoreId, string $timestamp): array
     {
         $score = ScoreModel::getByIdAndFkId($scoreId, $timestamp);
 

@@ -64,14 +64,14 @@ class Object
 
     /**
      * @param int $id
-     * @param int $foreignKeyId
+     * @param $foreignKeyId
      * @param bool $throwIfNull
      * @return static
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      * @throws ObjectNotFoundException
      */
-    public static function getByIdAndFkId(int $id, int $foreignKeyId, bool $throwIfNull = true): self
+    public static function getByIdAndFkId(int $id, $foreignKeyId, bool $throwIfNull = true): self
     {
         if (isset(self::$loadedObjects[static::class][$id][$foreignKeyId])) {
             return self::$loadedObjects[static::class][$id][$foreignKeyId];
@@ -434,13 +434,13 @@ class Object
 
     /**
      * @param int|null $id
-     * @param int|null $foreignKeyId
+     * @param int|string|null $foreignKeyId
      * @return static|null
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      * @throws \Model\Orm\Exceptions\ObjectNotFoundException
      */
-    public function load(int $id = null, int $foreignKeyId = null): ?self
+    public function load(int $id = null, $foreignKeyId = null): ?self
     {
         $id = $id ?? $this->getId();
 

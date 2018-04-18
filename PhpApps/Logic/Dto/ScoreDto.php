@@ -10,7 +10,7 @@ class ScoreDto extends Dto
     public $scoreId;
     /** @var int */
     public $score;
-    /** @var int */
+    /** @var \DateTime */
     public $date;
 
     /**
@@ -24,7 +24,7 @@ class ScoreDto extends Dto
         $dto = new self();
         $dto->scoreId = $score->scoreId;
         $dto->score = $score->score;
-        $dto->date = $score->date;
+        $dto->date = $score->getDateTime();
 
         return $dto;
     }
