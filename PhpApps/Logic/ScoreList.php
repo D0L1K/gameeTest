@@ -35,6 +35,9 @@ class ScoreList
     public function getTopByGame(Game $game, int $top): array
     {
         $scores = $this->loadScores($game);
+        if (\count($scores) === 0) {
+            return [];
+        }
         usort($scores, [$this, 'sortScores']);
         $scores = \array_slice($scores, 0, $top);
 
