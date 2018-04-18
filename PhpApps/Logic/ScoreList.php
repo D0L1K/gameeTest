@@ -85,15 +85,16 @@ class ScoreList
      */
     private function resolvePositions(array $scores): array
     {
-        $pos = 1;
+        $pos = $i = 1;
         $lastScore = null;
         /** @var ScoreDto[] $scores */
         foreach ($scores as $score) {
             if ($lastScore > $score->score) {
-                $pos++;
+                $pos = $i;
             }
             $score->position = $pos;
             $lastScore = $score->score;
+            $i++;
         }
 
         return $scores;
