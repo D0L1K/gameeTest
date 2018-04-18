@@ -114,9 +114,7 @@ class JsonRpcResponse implements \JsonSerializable
      */
     public function getHttpResponse(): JsonResponse
     {
-        $data = json_encode($this);
-
-        return new JsonResponse($data, 'application/json');
+        return new JsonResponse($this, 'application/json');
     }
 
     /**
