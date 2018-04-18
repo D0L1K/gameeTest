@@ -8,7 +8,7 @@ use Model\Orm\Object;
  * Class Score
  * @package Model
  *
- * @property PlayerGame $playerGame
+ * @property int $scoreId
  * @property int $score
  * @property \DateTime $date
  */
@@ -21,7 +21,7 @@ class Score extends Object
      */
     protected function initMapping(): void
     {
-        $this->addProperty('playerGame', Column::TYPE_INT, false, false, true);
+        $this->addProperty('scoreId', Column::TYPE_INT, false, false, true);
         $this->addProperty('date', Column::TYPE_DATE, false, true);
         $this->addProperty('score', Column::TYPE_INT, true);
         $this->setNoGenId();
@@ -40,7 +40,7 @@ class Score extends Object
     {
         // TODO: do not save after every set
         $obj = new self();
-        $obj->playerGame = $playerGame;
+        $obj->scoreId = $playerGame;
         $obj->score = $score;
         $obj->date = new \DateTime();
         $obj->save();
