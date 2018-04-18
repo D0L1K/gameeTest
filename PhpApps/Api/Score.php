@@ -2,6 +2,9 @@
 
 namespace Api;
 
+use Logic\Dto\GameDto;
+use Logic\Dto\ScoreDto;
+use Logic\Dto\ScoreListDto;
 use Logic\ScoreList;
 use Logic\Session;
 use Model\Orm\Exceptions\ObjectNotFoundException;
@@ -24,7 +27,7 @@ class Score
     {
         $score = ScoreModel::getByIdAndFkId($scoreId, $timestamp);
 
-        return [1];
+        return ScoreDto::fromModel($score)->toDto();
     }
 
     /**
@@ -46,7 +49,7 @@ class Score
         }
         $scoreObj = ScoreModel::create($playerGame, $score);
 
-        return ['scoreId' => $playerGame->scoreId, 'date' => $scoreObj->date, 'insertedScore' => $scoreObj->score];
+        return ScoreDto::fromModel($scoreObj)->toDto();
     }
 
     /**
@@ -56,6 +59,7 @@ class Score
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws ObjectNotFoundException
+     * @throws \ReflectionException
      */
     public function getTop(int $gameId, int $top = null): array
     {
@@ -66,11 +70,16 @@ class Score
         $session = $this->getSession();
         $scoreList = new ScoreList($session->getClient());
 
-        return ['gameId' => $game->getId(), 'scoreList' => $scoreList->getTopByGame($game, $top)];
+        $dto = new ScoreListDto();
+        $dto->game = GameDto::fromModel($game);
+        $dto->scorePositions = $scoreList->getTopByGame($game, $top);
+
+        return $dto->toDto();
     }
 
     /**
      * @return Session
+     * @throws \RuntimeException
      */
     private function getSession(): Session
     {

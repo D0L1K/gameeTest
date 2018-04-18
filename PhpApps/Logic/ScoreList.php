@@ -3,7 +3,7 @@ namespace Logic;
 
 use Kdyby\Redis\RedisClient;
 use Logic\Dto\PlayerDto;
-use Logic\Dto\ScoreDto;
+use Logic\Dto\ScorePositionDto;
 use Model\Game;
 use Model\Player;
 use Model\PlayerGame;
@@ -61,7 +61,7 @@ class ScoreList
             $player = Player::getById($playerId);
             $playerDto = PlayerDto::fromModel($player);
             foreach ($playerScores as $date => $score) {
-                $scores[] = ScoreDto::fromDto(['player' => $playerDto, 'score' => (int)$score, 'date' => $date]);
+                $scores[] = ScorePositionDto::fromDto(['player' => $playerDto, 'score' => (int)$score, 'date' => $date]);
             }
         }
 
@@ -69,11 +69,11 @@ class ScoreList
     }
 
     /**
-     * @param ScoreDto $a
-     * @param ScoreDto $b
+     * @param ScorePositionDto $a
+     * @param ScorePositionDto $b
      * @return int
      */
-    private function sortScores(ScoreDto $a, ScoreDto $b): int
+    private function sortScores(ScorePositionDto $a, ScorePositionDto $b): int
     {
         if ($a->score === $b->score) {
             return 0;
@@ -83,14 +83,14 @@ class ScoreList
     }
 
     /**
-     * @param ScoreDto[] $scores
-     * @return ScoreDto[]
+     * @param ScorePositionDto[] $scores
+     * @return ScorePositionDto[]
      */
     private function resolvePositions(array $scores): array
     {
         $pos = $i = 1;
         $lastScore = null;
-        /** @var ScoreDto[] $scores */
+        /** @var ScorePositionDto[] $scores */
         foreach ($scores as $score) {
             if ($lastScore > $score->score) {
                 $pos = $i;

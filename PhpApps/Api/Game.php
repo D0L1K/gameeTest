@@ -2,6 +2,7 @@
 
 namespace Api;
 
+use Logic\Dto\GameDto;
 use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Game as GameModel;
 
@@ -18,7 +19,7 @@ class Game
     {
         $game = GameModel::getById($gameId);
 
-        return [1];
+        return GameDto::fromModel($game)->toDto();
     }
 
     /**
@@ -32,6 +33,6 @@ class Game
     {
         $game = GameModel::create($name);
 
-        return ['gameId' => $game->getId()];
+        return GameDto::fromModel($game)->toDto();
     }
 }

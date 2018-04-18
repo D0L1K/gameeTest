@@ -2,6 +2,7 @@
 
 namespace Api;
 
+use Logic\Dto\PlayerDto;
 use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Player as PlayerModel;
 
@@ -18,9 +19,7 @@ class Player
     {
         $player = PlayerModel::getById($playerId);
 
-        $player2 = PlayerModel::getById($playerId);
-
-        return [1];
+        return PlayerDto::fromModel($player)->toDto();
     }
 
     /**
@@ -35,6 +34,6 @@ class Player
     {
         $player = PlayerModel::create($name, $city);
 
-        return ['playerId' => $player->getId()];
+        return PlayerDto::fromModel($player)->toDto();
     }
 }
