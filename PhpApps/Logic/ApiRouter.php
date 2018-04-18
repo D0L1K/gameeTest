@@ -34,7 +34,7 @@ class ApiRouter
             'score' => Score::class,
             'player' => Player::class,
             'game' => Game::class,
-            'scoreMap' => ScoreMap::class
+            'scoremap' => ScoreMap::class
         ];
 
         $this->inited = true;
