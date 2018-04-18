@@ -17,11 +17,13 @@ class Object
     /** @var Column[] */
     protected $valueColumns = [];
     /** @var Column|null */
-    private $idColumn;
+    private $idValueColumn;
     /** @var Column|null */
     private $foreignKeyColumn;
     /** @var string|null */
     private $genIdColumnName;
+    /** @var string|null */
+    private $externalIdColumnName;
     /** @var bool */
     private $genId = true;
     /** @var bool */
@@ -117,7 +119,7 @@ class Object
      */
     private function initDefault(): void
     {
-        if ($this->idColumn === null) {
+        if ($this->idValueColumn === null) {
             $this->addProperty(self::DEFAULT_ID_COL, Column::TYPE_INT, false, false, true);
         }
         if ($this->genId && $this->genIdColumnName === null) {
@@ -133,17 +135,17 @@ class Object
      * @param string $name
      * @param string|int $type
      * @param bool $isForeignKey
-     * @param bool $isId
+     * @param bool $valueInId
      * @param bool $isValue
      * @throws \InvalidArgumentException
      */
     protected function addProperty(
-        string $name, $type, bool $isValue = true, bool $isForeignKey = false, bool $isId = false): void
+        string $name, $type, bool $isValue = true, bool $isForeignKey = false, bool $valueInId = false): void
     {
-        $column = new Column($name, $type, $isValue, $isForeignKey, $isId);
+        $column = new Column($name, $type, $isValue, $isForeignKey, $valueInId);
         $this->columns[$name] = $column;
-        if ($isId) {
-            $this->addIdColumn($column);
+        if ($valueInId) {
+            $this->addIdValueColumn($column);
 
             return;
         }
@@ -159,17 +161,17 @@ class Object
      * @param Column $column
      * @throws \InvalidArgumentException
      */
-    private function addIdColumn(Column $column): void
+    private function addIdValueColumn(Column $column): void
     {
-        if ($this->idColumn !== null) {
+        if ($this->idValueColumn !== null) {
             throw new \InvalidArgumentException(
-                "ID column is already set. Actual: {$this->idColumn->getName()} Added: {$column->getName()}");
+                "ID column is already set. Actual: {$this->idValueColumn->getName()} Added: {$column->getName()}");
         }
         $type = $column->getType();
         if ($type !== Column::TYPE_INT && !\is_string($type)) {
             throw new \InvalidArgumentException('ID column has to be int or Model object');
         }
-        $this->idColumn = $column;
+        $this->idValueColumn = $column;
     }
 
     /**
@@ -180,7 +182,7 @@ class Object
     {
         if ($this->foreignKeyColumn !== null) {
             throw new \InvalidArgumentException(
-                "Foreign key column is already set. Actual: {$this->idColumn->getName()} Added: {$column->getName()}");
+                "Foreign key column is already set. Actual: {$this->idValueColumn->getName()} Added: {$column->getName()}");
         }
         if (\count($this->valueColumns) > 1) {
             throw new \InvalidArgumentException(
@@ -230,6 +232,35 @@ class Object
     protected function foreignKeyColExist(): bool
     {
         return $this->foreignKeyColumn !== null;
+    }
+
+    /**
+     * @param string $columnName
+     */
+    protected function setExternalId(string $columnName): void
+    {
+        if (!isset($this->$columnName)) {
+            throw new \InvalidArgumentException("Unknown column ($columnName) provided as external ID");
+        }
+        $this->externalIdColumnName = $columnName;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isExternalId(): bool
+    {
+        return $this->externalIdColumnName !== null;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getExternalId(): int
+    {
+        $colName = $this->externalIdColumnName;
+
+        return $this->$colName;
     }
 
     ////////////////////
@@ -285,7 +316,12 @@ class Object
      */
     public function getId(): ?int
     {
-        return $this->idColumn->getRawValue();
+        $idValue = $this->idValueColumn->getValue();
+        if (!($idValue instanceof self)) {
+            return $this->idValueColumn->getRawValue();
+        }
+
+        return $idValue->isExternalId() ? $idValue->getExternalId() : $idValue->getId();
     }
 
     /**
@@ -339,7 +375,7 @@ class Object
             }
         }
         if (!$isUpdate) {
-            $this->idColumn->setValue($id);
+            $this->idValueColumn->setValue($id);
             $this->initializing = false;
         }
     }
@@ -414,7 +450,7 @@ class Object
         if (\count($data) === 0) {
             return null;
         }
-        $this->idColumn->setValue($id);
+        $this->idValueColumn->setValue($id);
 
 
         $this->initializing = false;

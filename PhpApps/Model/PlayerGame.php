@@ -25,6 +25,7 @@ class PlayerGame extends Object
         $this->addProperty('player', Player::class, false, true);
         $this->addProperty('scoreId', Column::TYPE_INT, true, false, false);
         $this->setGenIdColumnName('scoreId');
+        $this->setExternalId('scoreId');
         parent::initMapping();
     }
 
