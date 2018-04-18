@@ -4,7 +4,7 @@ namespace Logic;
 use Api\Game;
 use Api\Player;
 use Api\Score;
-use Api\PlayerGame;
+use Api\ScoreMap;
 
 class ApiRouter
 {
@@ -34,7 +34,7 @@ class ApiRouter
             'score' => Score::class,
             'player' => Player::class,
             'game' => Game::class,
-            'playergame' => PlayerGame::class
+            'scoreMap' => ScoreMap::class
         ];
 
         $this->inited = true;

@@ -6,7 +6,7 @@ use Logic\Dto\PlayerDto;
 use Logic\Dto\ScorePositionDto;
 use Model\Game;
 use Model\Player;
-use Model\PlayerGame;
+use Model\ScoreMap;
 use Model\Score;
 
 class ScoreList
@@ -54,7 +54,7 @@ class ScoreList
      */
     private function loadScores(Game $game): array
     {
-        $playerIds = $this->dbClient->hGetAll(PlayerGame::getHashKey($game->getId()));
+        $playerIds = $this->dbClient->hGetAll(ScoreMap::getHashKey($game->getId()));
         $scores = [];
         foreach ($playerIds as $playerId => $scoreId) {
             $playerScores = $this->dbClient->hGetAll(Score::getHashKey($scoreId));

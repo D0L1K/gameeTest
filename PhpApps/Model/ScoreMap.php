@@ -12,9 +12,9 @@ use Model\Orm\Object;
  * @property Game $game
  * @property int $scoreId
  */
-class PlayerGame extends Object
+class ScoreMap extends Object
 {
-    protected static $tableKey = 'playerGame';
+    protected static $tableKey = 'scoreMap';
 
     /**
      * @throws \InvalidArgumentException
@@ -32,7 +32,7 @@ class PlayerGame extends Object
     /**
      * @param Player $player
      * @param Game $game
-     * @return PlayerGame
+     * @return ScoreMap
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws Orm\Exceptions\ObjectNotFoundException

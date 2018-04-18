@@ -2,14 +2,14 @@
 
 namespace Api;
 
-use Logic\Dto\PlayerGameDto;
-use Logic\Dto\PlayerGameSimpleDto;
+use Logic\Dto\ScoreMapDto;
+use Logic\Dto\ScoreMapSimpleDto;
 use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Game as GameModel;
 use Model\Player as PlayerModel;
-use Model\PlayerGame as PlayerGameModel;
+use Model\ScoreMap as ScoreMapModel;
 
-class PlayerGame
+class ScoreMap
 {
     /**
      * @param int $gameId
@@ -22,9 +22,9 @@ class PlayerGame
      */
     public function get(int $gameId, int $playerId, bool $extended = null): array
     {
-        $playerGame = PlayerGameModel::getByIdAndFkId($gameId, $playerId);
+        $scoreMap = ScoreMapModel::getByIdAndFkId($gameId, $playerId);
 
-        $dto = $extended ? PlayerGameDto::fromModel($playerGame) : PlayerGameSimpleDto::fromModel($playerGame);
+        $dto = $extended ? ScoreMapDto::fromModel($scoreMap) : ScoreMapSimpleDto::fromModel($scoreMap);
 
         return $dto->toDto();
     }
@@ -41,8 +41,8 @@ class PlayerGame
     {
         $player = PlayerModel::getById($playerId);
         $game = GameModel::getById($gameId);
-        $playerGame = PlayerGameModel::create($player, $game);
+        $scoreMap = ScoreMapModel::create($player, $game);
 
-        return PlayerGameSimpleDto::fromModel($playerGame)->toDto();
+        return ScoreMapSimpleDto::fromModel($scoreMap)->toDto();
     }
 }

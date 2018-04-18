@@ -29,18 +29,18 @@ class Score extends Object
     }
 
     /**
-     * @param PlayerGame $playerGame
+     * @param ScoreMap $scoreMap
      * @param int $score
      * @return Score
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      * @throws Orm\Exceptions\ObjectNotFoundException
      */
-    public static function create(PlayerGame $playerGame, int $score): self
+    public static function create(ScoreMap $scoreMap, int $score): self
     {
         // TODO: do not save after every set
         $obj = new self();
-        $obj->scoreId = $playerGame;
+        $obj->scoreId = $scoreMap;
         $obj->score = $score;
         $obj->date = new \DateTime();
         $obj->save();

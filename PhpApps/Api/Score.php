@@ -10,7 +10,7 @@ use Logic\Session;
 use Model\Orm\Exceptions\ObjectNotFoundException;
 use Model\Game as GameModel;
 use Model\Player as PlayerModel;
-use Model\PlayerGame as PlayerGameModel;
+use Model\ScoreMap as ScoreMapModel;
 use Model\Score as ScoreModel;
 
 class Score
@@ -43,11 +43,11 @@ class Score
     {
         $player = PlayerModel::getById($playerId);
         $game = GameModel::getById($gameId);
-        $playerGame = PlayerGameModel::getByIdAndFkId($gameId, $playerId);
-        if ($playerGame === null) {
-            $playerGame = PlayerGameModel::create($player, $game);
+        $scoreMap = ScoreMapModel::getByIdAndFkId($gameId, $playerId);
+        if ($scoreMap === null) {
+            $scoreMap = ScoreMapModel::create($player, $game);
         }
-        $scoreObj = ScoreModel::create($playerGame, $score);
+        $scoreObj = ScoreModel::create($scoreMap, $score);
 
         return ScoreDto::fromModel($scoreObj)->toDto();
     }
