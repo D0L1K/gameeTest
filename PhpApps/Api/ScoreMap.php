@@ -32,6 +32,21 @@ class ScoreMap
     /**
      * @param int $gameId
      * @param int $playerId
+     * @return int
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
+     */
+    public function getScoreId(int $gameId, int $playerId): int
+    {
+        $scoreMap = ScoreMapModel::getByIdAndFkId($gameId, $playerId);
+
+        return $scoreMap->getId();
+    }
+
+    /**
+     * @param int $gameId
+     * @param int $playerId
      * @return array
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
