@@ -42,7 +42,7 @@ class Score extends Object
         $obj = new self();
         $obj->scoreId = $scoreMap;
         $obj->score = $score;
-        $obj->date = new \DateTime();
+        $obj->setRawValue('date', microtime(true));
         $obj->save();
 
         return $obj;

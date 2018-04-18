@@ -270,9 +270,29 @@ class Object
     /**
      * @param string $name
      * @param mixed $value
-     * @throws \Exception
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
      */
-    public function __set(string $name, $value = null)
+    public function setRawValue(string $name, $value = null): void
+    {
+        if ($this->$name === $value) {
+            return;
+        }
+        $this->columns[$name]->setRawValue($value);
+        if (!$this->initializing) {
+            $this->save(true);
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws ObjectNotFoundException
+     */
+    public function __set(string $name, $value = null): void
     {
         if ($this->$name === $value) {
             return;
@@ -434,12 +454,18 @@ class Object
             }
             $this->foreignKeyColumn->setValue($foreignKeyId);
             $data = $this->getDbClient()->hGet(static::getHashKey($id), $this->foreignKeyColumn->getRawValue());
+            if ($data === false) {
+                return null;
+            }
             // ValueColumn should be everytime only one in this case
             foreach ($this->valueColumns as $valueColumn) {
                 $valueColumn->setValue($data);
             }
         } else {
             $data = $this->getDbClient()->hGetAll(static::getHashKey($id));
+            if (\count($data) === 0) {
+                return null;
+            }
             foreach ($data as $name => $value) {
                 if (isset($this->$name)) {
                     $this->$name = $value;
@@ -447,12 +473,7 @@ class Object
             }
         }
 
-        if (\count($data) === 0) {
-            return null;
-        }
         $this->idValueColumn->setValue($id);
-
-
         $this->initializing = false;
 
         return $this;
