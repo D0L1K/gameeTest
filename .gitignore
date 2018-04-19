@@ -5,6 +5,9 @@
 /Apache24/logs/
 /Apache24/conf/httpd.conf
 
+# PHP
+/PHP/php.ini
+
 # Redis
 /Redis/server_log.txt
 /Redis/dump.rdb
