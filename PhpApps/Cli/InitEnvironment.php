@@ -9,6 +9,9 @@ class InitEnvironment
     /** @var bool */
     private $error = false;
 
+    /**
+     * InitEnvironment constructor.
+     */
     public function __construct()
     {
         $this->apachePath = realpath(__DIR__ . '\\..\\..\\Apache24\\');

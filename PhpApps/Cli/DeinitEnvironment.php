@@ -2,8 +2,21 @@
 
 class DeinitEnvironment
 {
+    /** @var string */
+    private $apachePath;
+    /** @var string */
+    private $redisPath;
     /** @var bool */
     private $error = false;
+
+    /**
+     * DeinitEnvironment constructor.
+     */
+    public function __construct()
+    {
+        $this->apachePath = realpath(__DIR__ . '\\..\\..\\Apache24\\');
+        $this->redisPath = realpath(__DIR__ . '\\..\\..\\Redis\\');
+    }
 
     /**
      * @return int
@@ -18,6 +31,8 @@ class DeinitEnvironment
             $this->stopRedis();
             sleep(1);
             $this->removeRedisService();
+            sleep(1);
+            $this->deleteCreatedFiles();
         } catch (\Exception $e) {
             $this->echoResult('Error: ' . $e->getMessage());
             $this->error = true;
@@ -111,6 +126,28 @@ class DeinitEnvironment
             $this->error = true;
         } else {
             $this->echoResult('Deleted.');
+        }
+    }
+
+    private function deleteCreatedFiles(): void
+    {
+        $this->echoStep('Deleting created files');
+        $this->flushFolder($this->apachePath . '\\logs\\');
+        @unlink($this->redisPath . '\\dump.rdb');
+        @unlink($this->redisPath . '\\server_log.txt');
+        $this->echoResult('Deleted.');
+    }
+
+    /**
+     * @param string $path
+     */
+    private function flushFolder(string $path): void
+    {
+        $files = glob($path . '*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                @unlink($file);
+            }
         }
     }
 }
