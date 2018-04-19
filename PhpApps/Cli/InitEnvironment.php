@@ -6,6 +6,8 @@ class InitEnvironment
     private $apachePath;
     /** @var string */
     private $redisPath;
+    /** @var string */
+    private $phpPath;
     /** @var bool */
     private $error = false;
 
@@ -16,6 +18,7 @@ class InitEnvironment
     {
         $this->apachePath = realpath(__DIR__ . '\\..\\..\\Apache24\\');
         $this->redisPath = realpath(__DIR__ . '\\..\\..\\Redis\\');
+        $this->phpPath = realpath(__DIR__ . '\\..\\..\\PHP\\');
     }
 
     /**
@@ -25,9 +28,12 @@ class InitEnvironment
     public function run(): int
     {
         try {
-            $httpdConf = $this->loadHttpsConfTemplate();;
+            $httpdConf = $this->loadHttpsConfTemplate();
             $httpdConf = $this->fillHttpdConfVars($httpdConf);
             $this->createHttpdConf($httpdConf);
+            $phpIni = $this->loadPhpIniTemplate();
+            $phpIni = $this->fillPhpIniVars($phpIni);
+            $this->createPhpIni($phpIni);
             $this->createApacheService();
             $this->startApache();
             $this->createRedisService();
@@ -111,8 +117,8 @@ class InitEnvironment
                 '%PHPROOT%',
                 '%PHPAPPSROOT%'],
             [
-                realpath($this->apachePath),
-                realpath(__DIR__ . '\\..\\..\\PHP\\'),
+                $this->apachePath,
+                $this->phpPath,
                 realpath(__DIR__ . '\\..\\')
             ], $httpdConf);
         $this->echoResult('Configured.');
@@ -126,11 +132,61 @@ class InitEnvironment
     private function createHttpdConf(string $httpdConf): void
     {
         $this->echoStep('Creating httpd.conf');
-        $httpdTemplate = $this->apachePath . '\\conf\\httpd.conf';
-        $fp = fopen($httpdTemplate, 'wb');
+        $httpdConfPath = $this->apachePath . '\\conf\\httpd.conf';
+        $fp = fopen($httpdConfPath, 'wb');
         $result = fwrite($fp, $httpdConf);
         if ($result === false) {
             throw new \RuntimeException('Unable to create httpd.conf');
+        }
+        $this->echoResult('Created.');
+    }
+
+    /**
+     * @return string
+     * @throws \RuntimeException
+     */
+    private function loadPhpIniTemplate(): string
+    {
+        $this->echoStep('Loading php.ini template');
+        $phpIniTemplate = realpath(__DIR__ . '\\..\\..\\res\\php-template.ini');
+        if (!file_exists($phpIniTemplate)) {
+            throw new \RuntimeException('Php.ini template not found');
+        }
+
+        $fp = fopen($phpIniTemplate, 'rb');
+        $content = fread($fp, filesize($phpIniTemplate));
+        if ($content === false) {
+            throw new \RuntimeException('Unable to read php.ini template');
+        }
+        $this->echoResult('Loaded.');
+
+        return $content;
+    }
+
+    /**
+     * @param string $phpIni
+     * @return string
+     */
+    private function fillPhpIniVars(string $phpIni): string
+    {
+        $this->echoStep('Configuring php.ini');
+        $content = str_replace('%PHPROOT%', $this->phpPath, $phpIni);
+        $this->echoResult('Configured.');
+
+        return $content;
+    }
+
+    /**
+     * @param string $phpIni
+     */
+    private function createPhpIni(string $phpIni): void
+    {
+        $this->echoStep('Creating php.ini');
+        $phpIniPath = $this->phpPath . '\\php.ini';
+        $fp = fopen($phpIniPath, 'wb');
+        $result = fwrite($fp, $phpIni);
+        if ($result === false) {
+            throw new \RuntimeException('Unable to create php.ini');
         }
         $this->echoResult('Created.');
     }
