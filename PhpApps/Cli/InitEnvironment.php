@@ -6,6 +6,8 @@ class InitEnvironment
     private $apachePath;
     /** @var string */
     private $redisPath;
+    /** @var bool */
+    private $error = false;
 
     public function __construct()
     {
@@ -27,15 +29,20 @@ class InitEnvironment
             $this->startApache();
             $this->createRedisService();
             $this->startRedis();
-
-            echo "\nServer started, waiting for requests on 127.0.0.1:8080\nHave Fun!";
-
-            return 0;
         } catch (\Exception $e) {
             $this->echoResult('Error: ' . $e->getMessage());
+            $this->error = true;
+        }
+
+        if ($this->error) {
+            echo "\nThere was an error starting server. Check output, do uninstall and try again.";
 
             return 1;
         }
+
+        echo "\nServer started, waiting for requests on 127.0.0.1:8080\nHave Fun!";
+
+        return 0;
     }
 
     /**
@@ -125,7 +132,10 @@ class InitEnvironment
         $this->echoResult('Created.');
     }
 
-    private function createApacheService(): void
+    /**
+     * @return bool
+     */
+    private function createApacheService(): bool
     {
         $this->echoStep('Creating Apache service');
 
@@ -133,23 +143,41 @@ class InitEnvironment
         exec('"' . $httpdExe . '" -k install -n "Apache24"', $output, $return);
         if ($return !== 0) {
             $output = "\n" . implode("\n", $output);
-            throw new \RuntimeException("Creating Apache service failed!\n\nExit code: $return\nOutput: $output");
+            $this->echoResult("Creating Apache service failed!\n\nExit code: $return\nOutput: $output");
+            $this->error = true;
+
+            return false;
         }
+
         $this->echoResult('Created.');
+
+        return true;
     }
 
-    private function startApache(): void
+    /**
+     * @return bool
+     */
+    private function startApache(): bool
     {
         $this->echoStep('Starting Apache');
         exec('sc start Apache24', $output, $return);
         if ($return !== 0) {
             $output = "\n" . implode("\n", $output);
-            throw new \RuntimeException("Starting Apache service failed!\n\nExit code: $return\nOutput: $output");
+            $this->echoResult("Starting Apache service failed!\n\nExit code: $return\nOutput: $output");
+            $this->error = true;
+
+            return false;
         }
+
         $this->echoResult('Started.');
+
+        return true;
     }
 
-    private function createRedisService(): void
+    /**
+     * @return bool
+     */
+    private function createRedisService(): bool
     {
         $this->echoStep('Creating Redis service');
         $redisExe = realpath($this->redisPath . '\\redis-server.exe');
@@ -157,22 +185,37 @@ class InitEnvironment
 
         exec('"' . $redisExe . '" --service-install "' . $redisConf . '" --service-name redis6379 --port 6379',
             $output, $return );
-        if ($return !== 0) {
+        if ($return !== 1) {
             $output = "\n" . implode("\n", $output);
-            throw new \RuntimeException("Creating Redis service failed!\n\nExit code: $return\nOutput: $output");
+            $this->echoResult("Creating Redis service failed!\n\nExit code: $return\nOutput: $output");
+            $this->error = true;
+
+            return false;
         }
+
         $this->echoResult('Created.');
+
+        return true;
     }
 
-    private function startRedis(): void
+    /**
+     * @return bool
+     */
+    private function startRedis(): bool
     {
         $this->echoStep('Starting Redis');
         exec('sc start redis6379',$output, $return );
         if ($return !== 0) {
             $output = "\n" . implode("\n", $output);
-            throw new \RuntimeException("Starting Redis service failed!\n\nExit code: $return\nOutput: $output");
+            $this->echoResult("Starting Redis service failed!\n\nExit code: $return\nOutput: $output");
+            $this->error = true;
+
+            return false;
         }
+
         $this->echoResult('Started.');
+
+        return true;
     }
 }
 
