@@ -3,6 +3,7 @@
 
 # Apache
 /Apache24/logs/
+/Apache24/conf/httpd.conf
 
 # Redis
 /Redis/server_log.txt
